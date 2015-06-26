@@ -1,6 +1,5 @@
 // app/routes.js
 var async = require("async");
-var accounting = require("accounting");
 var crypto = require('crypto-js');
 var moment = require('moment');
 var request = require('request');
@@ -23,7 +22,6 @@ function protected_user_info(user, facebookAccount, googleAccount) {
     var ret = {
         id: user.id,
         email: user.email,
-        currency: user.currency,
         avatar: user.avatar || defaultAvatar
     };
 
@@ -144,57 +142,6 @@ module.exports = function (server, passport, fx, jwt) {
 
             });
         });
-    });
-
-
-    // POST /api/login/local
-    server.post('/api/login/local', function (req, res) {
-
-        passport.authenticate('local-login', function (err, user, info) {
-
-            if (!user)
-                return res.json(401, info);
-
-            req.logIn(user, function (err) {
-
-                if (err)
-                    return res.send(401);
-
-                var expires = moment().add('days', 7).valueOf();
-                var token = generateToken(user.id, expires);
-                res.send(200, {
-                    access_token: token,
-                    exp: expires,
-                    user: protected_user_info(user)
-                });
-            });
-        })(req, res);
-
-    });
-
-    // POST /api/signup/local
-    server.post('/api/signup/local', function (req, res, next) {
-
-        passport.authenticate('local-signup', function (err, user, info) {
-
-            if (!user)
-                return res.json(401, info);
-
-            req.logIn(user, function (err) {
-
-                if (err)
-                    return res.send(401);
-
-                var expires = moment().add('days', 7).valueOf();
-                var token = generateToken(user.id, expires);
-                res.send(200, {
-                    access_token: token,
-                    exp: expires,
-                    user: protected_user_info(user)
-                });
-            });
-        })(req, res, next);
-
     });
 
     // POST /api/login/facebook
@@ -772,16 +719,6 @@ module.exports = function (server, passport, fx, jwt) {
         });
     });
 
-    // GET /api/exchangeRates
-    server.get('/api/exchangeRates', function (req, res) {
-
-        return res.json(200, {
-            base: fx.base,
-            rates: fx.rates
-        });
-
-    });
-
     // GET /api/users/{id}
     server.get('/api/users/:id', function (req, res) {
 
@@ -830,8 +767,8 @@ module.exports = function (server, passport, fx, jwt) {
             return res.json(409, {error: "No body defined."});
         }
 
-        if (req.body.email === undefined && req.body.currency == undefined && req.body.avatar == undefined && req.body.password == undefined) {
-            return res.json(409, {error: "Can only change 'email', 'currency', 'avatar' or 'password' attributes of the user."});
+        if (req.body.email === undefined && req.body.avatar == undefined) {
+            return res.json(409, {error: "Can only change 'email' or 'avatar' attributes of the user."});
         }
 
         req.models.user.get(req.params.id, function (err, user) {
@@ -845,16 +782,8 @@ module.exports = function (server, passport, fx, jwt) {
                 updateObj.email = req.body.email;
             }
 
-            if (req.body.currency) {
-                updateObj.currency = req.body.currency;
-            }
-
             if (req.body.avatar) {
                 updateObj.avatar = req.body.avatar;
-            }
-
-            if (req.body.password) {
-                updateObj.passwordHash = req.body.password;
             }
 
             user.save(updateObj, function (err) {
@@ -942,462 +871,6 @@ module.exports = function (server, passport, fx, jwt) {
         })
     });
 
-    // GET /api/users/{id}/debts/{debtId}
-    server.get('/api/users/:id/debts/:debtId', function (req, res) {
-
-        req.models.user.get(req.params.id, function (err, user) {
-
-            if (err || !user) {
-                res.json(404, {error: "User '" + req.params.id + "' does not exist" });
-                return;
-            }
-
-            user.getDebts().find({ id: req.params.debtId }, function (err, debts) {
-
-                if (err || debts.length === 0) {
-                    res.json(404, { error: "Debt '" + req.params.debtId + "' does not exist" });
-                    return;
-                }
-
-                var debt = debts[0];
-                var ret = {
-                    description: debt.description,
-                    debtId: debt.id,
-                    creditor: debt.creditor_id,
-                    debtor: debt.debtor_id,
-                    created: debt.created,
-                    modified: debt.modified
-                };
-
-                var currency = req.query.currency || debt.currency;
-
-                ret.originalValue = convertMoney(debt.originalValue, debt.currency, currency);
-                ret.value = convertMoney(debt.value, debt.currency, currency);
-                ret.currency = req.query.currency;
-
-                res.json(200, ret);
-            });
-        });
-
-    });
-
-    // PATCH /api/users/{id}/debts/{debtId}
-    server.patch('/api/users/:id/debts/:debtId', function (req, res, next) {
-
-        if (req.body === undefined) {
-            return res.json(409, {error: "No body defined."});
-        }
-
-        if (isNaN(req.body.value)) {
-            return res.json(409, {error: "Attribute 'value' needs to be a number."});
-        }
-
-        req.models.user.exists({ id: req.params.id }, function (err, exists) {
-
-            if (err || !exists) {
-                res.json(404, { error: "User '" + req.params.id + "' does not exist" });
-                return;
-            }
-
-            req.models.debt.get(req.params.debtId, function (err, debt) { // get the debt instance
-
-                if (err || !debt) {
-                    return res.json(404, {error: "User '" + req.params.debtId + "' does not exist"});
-                }
-
-                if (req.body.value !== undefined) {
-                    debt.value = req.body.value;
-                    debt.currency = req.body.currency;
-                }
-
-                if (req.body.description) {
-                    debt.description = req.body.description;
-                }
-
-                debt.save(function (err) { // update the debt instance
-
-                    if (err)
-                        return res.json(500, err);
-
-                    res.json(200, {
-                        debtId: debt.id,
-                        creditor: debt.creditor_id,
-                        debtor: debt.debtor_id,
-                        originalValue: debt.originalValue,
-                        value: debt.value,
-                        currency: debt.currency,
-                        created: debt.created,
-                        modified: debt.modified,
-                        description: debt.description
-                    });
-                });
-            });
-        });
-
-    });
-
-    // DELETE /api/users/{id}/debts/{debtId}
-    server.del('/api/users/:id/debts/:debtId', function (req, res) {
-        req.models.user.exists({ id: req.params.id }, function (err, exists) {
-            if (err || !exists) {
-                res.json(404, { error: "User '" + req.params.id + "' does not exist"});
-                return;
-            }
-
-            req.models.debt.get(req.params.debtId, function (err, debt) {
-                if (err)
-                    return res.json(404, { error: "Debt '" + req.params.debtId + "' does not exist" });
-
-                debt.remove(function (err) {
-                    if (err)
-                        return res.json(500, { error: "Could not remove debt '" + req.params.debtId + "': " + err });
-                    res.send(204);
-                });
-            });
-        });
-    });
-
-    // GET /api/users/{id}/debts
-    server.get('/api/users/:id/debts', function (req, res) {
-
-        var currency = req.query.currency ? req.query.currency : req.user.currency;
-
-        req.models.user.get(req.params.id, function (err, user) {
-
-            if (err || !user)
-                return res.json(404, { error: "User '" + req.params.id + "' does not exist" });
-
-            user.getCredits(function (err, credits) {
-                if (err || !credits)
-                    return res.json(500, err);
-
-                user.getDebts(function (err, debts) {
-                    if (err || !debts)
-                        return res.json(500, err);
-
-                    debts = credits.concat(debts);
-
-                    async.reduce(debts, { credit: 0, debit: 0}, function (memo, debt, cb) {
-                        var val = convertMoney(debt.value, debt.currency, currency);
-                        if (user.id === debt.creditor_id) {
-                            memo.credit += val;
-                        } else {
-                            memo.debit += val;
-                        }
-
-                        cb(null, memo);
-                    }, function (err, values) {
-                        var balance = values.credit - values.debit;
-
-                        async.map(debts, asyncDebtConversion.bind(undefined, req.query.currency), function (err, debtsConverted) {
-                            if (err)
-                                return res.json(500, err);
-
-                            var debtsData = {
-                                total: debtsConverted.length,
-                                balance: values.credit - values.debit,
-                                credit: values.credit,
-                                debit: values.debit,
-                                currency: currency,
-                                debts: debtsConverted
-                            };
-
-                            async.each(debtsData.debts, function (debt, callback) {
-                                req.models.user.get(debt.creditor, function (err, creditor) {
-                                    if (!err)
-                                        debt.creditorAvatar = creditor.avatar;
-
-                                    req.models.user.get(debt.debtor, function (err, debtor) {
-                                        if (!err)
-                                            debt.debtorAvatar = debtor.avatar;
-
-                                        callback(null);
-                                    })
-                                });
-                            }, function (err) {
-                                res.json(debtsData);
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    });
-
-    // POST /api/users/{id}/debts
-    server.post('/api/users/:id/debts', function (req, res, next) {
-
-        if (req.body === undefined) {
-            return res.json(409, {error: "No body defined."});
-        }
-
-        if (req.body.user === undefined) {
-            return res.json(409, {error: "Attribute 'user' is missing."});
-        }
-
-        if (req.body.value === undefined) {
-            return res.json(409, {error: "Attribute 'value' is missing."});
-        }
-
-        if (!req.body.currency)
-            return res.json(409, {error: "Attribute 'currency' is missing"});
-
-        if (isNaN(req.body.value)) {
-            return res.json(409, {error: "Attribute 'value' needs to be a number."});
-        }
-
-        req.models.user.exists({ id: req.params.id }, function (err, exists) {
-
-            if (err) {
-                res.json(500, err);
-                return;
-            }
-
-            if (!exists) {
-                res.json(404, {error: "User '" + req.params.id + "' does not exist" });
-                return;
-            }
-
-            req.models.user.exists({ id: req.body.user }, function (err, exists) {
-
-                if (err)
-                    return res.json(500, err);
-
-                if (!exists)
-                    return res.json(404, {error: "User '" + req.body.user + "' does not exist" });
-
-                var description = "";
-                if (req.body.description)
-                    description = req.body.description;
-
-                req.models.debt.create({
-
-                    creditor_id: req.params.id,
-                    debtor_id: req.body.user,
-                    originalValue: req.body.value,
-                    description: req.body.description || '',
-                    value: req.body.value,
-                    currency: req.body.currency,
-                    description: description
-
-                }, function (err, debt) {
-
-                    if (err || !debt)
-                        return res.json(500, err);
-
-                    res.json(201, {
-                        debtId: debt.id,
-                        creditor: debt.creditor_id,
-                        debtor: debt.debtor_id,
-                        originalValue: debt.originalValue,
-                        value: debt.value,
-                        description: debt.description,
-                        currency: debt.currency,
-                        created: debt.created,
-                        modified: debt.modified,
-                        description: debt.description
-                    });
-
-                });
-            });
-        });
-
-    });
-
-    // GET /api/users/{id}/friends/{friendId}
-    server.get('/api/users/:id/friends/:friendId', function (req, res) {
-
-        req.models.user.get(req.params.id, function (err, user) {
-            if (err) {
-                res.json(404, { error: "User '" + req.params.id + "' does not exist" });
-                return;
-            }
-
-            user.getFriends({ id: req.params.friendId }, function (err, friends) {
-
-                if (err || friends.length === 0) {
-                    res.json(404, { error: "User '" + req.params.friendId + "' is not a friend" });
-                    return;
-                }
-
-                res.json(200, { id: friends[0].id });
-            });
-        });
-
-    });
-
-    // DELETE /api/users/{id}/friends/{friendId}
-    server.del('/api/users/:id/friends/:friendId', function (req, res) {
-
-        req.models.user.get(req.params.id, function (err, me) {
-
-            if (err) {
-                res.json(500, err);
-                return;
-            } else if (!me) {
-                res.json(404, { error: "User (me) '" + req.body.id + "' does not exist." });
-                return;
-            }
-
-            // check if the friend exists
-            req.models.user.get(req.params.friendId, function (err, friend) {
-
-                if (err) {
-                    res.json(500, err);
-                    return;
-                } else if (!friend) {
-                    res.json(404, { error: "User (friend) '" + req.body.id + "' does not exist." });
-                    return;
-                }
-
-                me.removeFriends([friend], function (err) {
-                    if (err) {
-                        res.json(500, err);
-                        return;
-                    }
-
-                    res.send(204);
-                });
-            });
-        });
-
-    });
-
-    // GET /api/users/{id}/friends
-    server.get('/api/users/:id/friends', function (req, res) {
-
-        req.models.user.get(req.params.id, function (err, me) {
-            if (err) {
-                res.json(500, err);
-                return;
-            } else if (!me) {
-                res.json(404, { error: "User (me) '" + req.body.id + "' does not exist." });
-                return;
-            }
-
-            me.getFriends(function (err, friends) {
-                if (err) {
-                    res.json(500, err);
-                    return;
-                } else if (!friends) {
-                    res.json(404, { error: "Friends does not exist." });
-                    return;
-                }
-
-                friends = friends.map(public_user_info);
-
-                var obj = {
-                    "total": friends.length,
-                    "friends": friends
-                };
-
-                return res.json(200, obj);
-            });
-        });
-    });
-
-    // GET /api/users/{id}/friends/facebook
-    server.get('/api/users/:id/friends/facebook', function (req, res) {
-
-        req.models.user.get(req.params.id, function (err, me) {
-            if (err) {
-                res.json(500, err);
-                return;
-            } else if (!me) {
-                res.json(404, { error: "User (me) '" + req.body.id + "' does not exist." });
-                return;
-            }
-
-            me.getFriends(function (err, friends) {
-                if (err) {
-                    res.json(500, err);
-                    return;
-                } else if (!friends) {
-                    res.json(404, { error: "Friends does not exist." });
-                    return;
-                }
-
-                friends = friends.map(public_user_info);
-
-                var obj = {
-                    "total": friends.length,
-                    "friends": friends
-                };
-
-                return res.json(200, obj);
-            });
-        });
-    });
-
-    // POST /api/users/{id}/friends
-    server.post('/api/users/:id/friends', function (req, res, next) {
-
-        if (req.body === undefined) {
-            return res.json(409, {error: "No body defined."});
-        }
-
-        if (req.body.id === undefined) {
-            return res.json(409, {error: "Attribute 'id' is missing."});
-        }
-
-        req.models.user.get(req.params.id, function (err, me) {
-
-            if (err) {
-                res.json(500, err);
-                return;
-            } else if (!me) {
-                res.json(404, { error: "User (me) '" + req.body.id + "' does not exist." });
-                return;
-            }
-
-            // check if the friend exists
-            req.models.user.get(req.body.id, function (err, friend) {
-
-                if (err) {
-                    res.json(500, {error: err});
-                    return;
-                } else if (!friend) {
-                    res.json(404, {error: "User (friend) '" + req.body.id + "' does not exist."});
-                    return;
-                }
-
-                me.addFriends([friend], { date: new Date() }, function (err) {
-                    if (err) {
-                        res.json(500, err);
-                        return;
-                    }
-
-                    res.json(201, { id: friend.id });
-                });
-            });
-        });
-
-    });
-
-    // DELETE /api/users/{id}/friends
-    server.del('/api/users/:id/friends', function (req, res) {
-
-        req.models.user.get(req.params.id, function (err, me) {
-            if (err) {
-                res.json(500, err);
-                return;
-            } else if (!me) {
-                res.json(404, { error: "User (me) '" + req.body.id + "' does not exist." });
-                return;
-            }
-
-            me.setFriends([], function (err) {
-                if (err) {
-                    res.json(500, err);
-                    return;
-                }
-
-                res.send(204);
-            });
-        });
-
-    });
-
     // GET /api/users
     server.get('/api/users', function (req, res) {
         req.models.user.find({}).run(function (err, users) {
@@ -1457,19 +930,9 @@ module.exports = function (server, passport, fx, jwt) {
             return res.json(409, {error: "Attribute 'email' is not a valid email address."});
         }
 
-        if (req.body.passwordHash === undefined) {
-            return res.json(409, {error: "Attribute 'passwordHash' is missing"});
-        }
-
-        if (req.body.currency === undefined) {
-            return res.json(409, {error: "Attribute 'currency' is missing"});
-        }
-
         req.models.user.create({
             id: req.body.id,
-            passwordHash: req.body.passwordHash,
             email: req.body.email,
-            currency: req.body.currency,
             avatar: req.body.avatar // can be empty
         }, function (err, user) {
             if (err) {
@@ -1498,27 +961,6 @@ module.exports = function (server, passport, fx, jwt) {
         return callback(true);
     }
 
-    function asyncDebtConversion(currency, debt, callback) {
-
-        if (!currency)
-            currency = debt.currency;
-
-        return callback(null, {
-            debtId: debt.id,
-            description: debt.description,
-            creditor: debt.creditor_id,
-            creditorAvatar: defaultAvatar,
-            debtor: debt.debtor_id,
-            debtorAvatar: defaultAvatar,
-            originalValue: convertMoney(debt.originalValue, debt.currency, currency),
-            value: convertMoney(debt.value, debt.currency, currency),
-            currency: currency,
-            created: debt.created,
-            modified: debt.modified,
-            description: debt.description
-        });
-    }
-
     function validChecksum(req, res, next) {
 
         var checksum = req.get("X-Checksum");
@@ -1534,11 +976,6 @@ module.exports = function (server, passport, fx, jwt) {
         }
 
         return next();
-    }
-
-    function convertMoney(value, srcCurrency, destCurrency) {
-        // TODO: remove use of parseFloat
-        return parseFloat(accounting.toFixed(fx(value).from(srcCurrency).to(destCurrency), 4));
     }
 
     function generateToken(userId, expirationDate) {
