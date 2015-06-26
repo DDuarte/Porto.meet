@@ -1,0 +1,52 @@
+<ion-nav-buttons side="right">
+    <button ng-if="isOwner(currentUserId) && friends.length > 0" class="button button-icon icon ion-ios7-minus-outline"
+            ng-click="data.showDelete = !data.showDelete"></button>
+</ion-nav-buttons>
+<ion-view title={{title}}>
+    <ion-header-bar class="bar-light bar-subheader">
+        <input type="search"
+               placeholder="Filter friends..."
+               ng-model="searchText.id">
+    </ion-header-bar>
+    <ion-content class="has-header">
+        <ion-list can-swipe="true" show-delete="data.showDelete" >
+            <ion-item ng-repeat="friend in friends | filter:searchText:strict" href="#/app/users/{{friend.id}}"
+                      class="item-thumbnail-left">
+                <ion-option-button class="button-calm"
+                                   ng-click="">
+                    + Debt
+                </ion-option-button>
+                <img ng-src="{{friend.avatar}}">
+
+                <h2>{{friend.id}}</h2>
+                <ion-delete-button class="ion-minus-circled"
+                                   ng-click="onFriendDelete(friend)">
+                </ion-delete-button>
+            </ion-item>
+        </ion-list>
+        <ion-list  can-swipe="true" ng-if="!loading && friends.length == 0">
+
+            <h3 ng-if="isOwner(currentUserId)" class="list-inset" style="color: #777777; text-align: center;"> <br/>You have no friends yet <b>:(</b><br/>  Click the button bellow to start adding</h3>
+            <h3 ng-if="!isOwner(currentUserId)" class="list-inset" style="color: #777777; text-align: center;"> <br/>{{userId}} has no friends yet <b>:(</b></h3>
+
+
+        </ion-list>
+
+        <div ng-if="loading"  style="text-align: center;  font-size: 90px; color: #999999;" >
+            <i class="icon ion-ios7-reloading" ></i>
+        </div>
+
+    </ion-content>
+
+    <ion-footer-bar>
+        <ion-tabs class="tabs-icon-top">
+
+            <button class="button button-balanced col col-100 icon ion-android-add-contact"
+                    ng-click="openModal()"
+                    ng-if="isOwner(currentUserId)">
+                Add new Friend
+            </button>
+        </ion-tabs>
+    </ion-footer-bar>
+
+</ion-view>

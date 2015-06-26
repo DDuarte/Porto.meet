@@ -1,0 +1,29 @@
+<div class="modal">
+    <ion-header-bar class="bar bar-header bar-positive">
+        <h1 class="title">Add friend</h1>
+        <button class="button button-clear button-primary" ng-click="closeModal()">Close</button>
+    </ion-header-bar>
+    <ion-content class="has-header">
+        <div class="list list-inset">
+            <label class="item item-input">
+                <i class="icon ion-search placeholder-icon"></i>
+                <input type="text" placeholder="Search" ng-model="textSearch" ng-keyup="searchUsers(textSearch)">
+            </label>
+        </div>
+        <ion-list>
+            <ion-item ng-repeat="user in users"
+                      class="item-thumbnail-left item-button-right">
+                <img ng-src="{{user.avatar}}">
+
+                <h2>{{user.id}}</h2>
+
+                <button ng-if="!isFriend(user)" class="button button-positive" ng-click="addFriend(user)">
+                    Add
+                </button>
+                <button ng-if="isFriend(user)" class="button button-assertive disabled">
+                    Added
+                </button>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</div>

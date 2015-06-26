@@ -1,0 +1,30 @@
+<div class="modal">
+    <ion-header-bar class="bar bar-header bar-positive">
+        <h1 class="title">Create Debt</h1>
+        <button class="button button-clear button-primary" ng-click="closeFriendsModal()">Close</button>
+    </ion-header-bar>
+    <ion-content class="has-header">
+        <div class="list list-inset">
+            <label class="item item-input">
+                <i class="icon ion-search placeholder-icon"></i>
+                <input type="text" placeholder="Search" ng-model="textSearch.id">
+            </label>
+        </div>
+        <ion-list>
+            <ion-checkbox class="item-checkbox-right"
+                          ng-repeat="friend in friends | filter:textSearch:strict | orderBy:'id'"
+                          ng-model="friend.isChecked">
+                <ion-item class="item-thumbnail-left">
+                    <img ng-src="{{friend.avatar}}">
+
+                    <h2>{{friend.id}}</h2>
+                </ion-item>
+            </ion-checkbox>
+        </ion-list>
+    </ion-content>
+    <ion-footer-bar align-title="left" class="bar-balanced" ng-show="checkCheckedFriends()">
+        <button class="button button-clear button-full" ng-click="openCreateDebtModal()">
+            Ok
+        </button>
+    </ion-footer-bar>
+</div>

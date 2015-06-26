@@ -1,0 +1,123 @@
+<ion-view title="{{user.id}}">
+    <ion-content has-header="true" padding="true">
+
+        <div class="item-thumbnail-left">
+            <img ng-src="{{user.avatar}}">
+
+            <div class="details">
+                <h3>{{ user.id }}</h3>
+
+                <p ng-if="user.id == currentUser.id"><i class="icon ion-ios7-email"></i> Email: {{ currentUser.email }}</p>
+                <h4 ng-class="(debts.balance < 0) ? 'assertive' : 'balanced'" ng-if="user.id == currentUser.id">{{ debts.balance.toFixed(2) }} {{
+                    debts.currency }}</h4>
+            </div>
+        </div>
+
+        <div ng-if="debts && user.id == currentUser.id" class="list card">
+            <a class="item " ui-sref="app.debts({userId: user.id, initFilter:'details'})">
+                <div class=" item-icon-left">
+                    <i class="icon ion-clipboard"></i>
+                    <div class="details">
+                        Debts: {{ countActive(debts.total) }}
+                        <br/>
+                        Own to me: <span ng-class="(debts.credit > 0) ? 'balanced' : ''"> {{ debts.credit.toFixed(2) }} {{ debts.currency }} </span>
+                        <br/>
+                        I owe to others: <span ng-class="(debts.debit > 0) ? 'assertive' : ''"> {{ debts.debit.toFixed(2) }} {{ debts.currency }} </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div ng-if="!debts  && currentUser.id == user.id"  style="text-align: center;  font-size: 90px; color: #999999;" >
+            <i class="icon ion-ios7-reloading" ></i>
+        </div>
+
+        <div ng-if="user && debts" class="list card">
+            <a class="item item-icon-left item-icon-right" ui-sref="app.friends({userId: user.id})"><i
+                    class="icon ion-person-stalker"></i>
+                <span ng-if="user.id != currentUser.id">{{user.id}}'s</span>
+                <span ng-if="user.id == currentUser.id">My </span>
+                friends
+                <i class="icon ion-chevron-right icon-accessory"></i></a>
+        </div>
+
+
+
+
+
+
+        <div ng-if="loadingDebts  && currentUser.id != user.id"  style="text-align: center;  font-size: 90px; color: #999999;" >
+            <i class="icon ion-ios7-reloading" ></i>
+        </div>
+
+
+        <ion-list class="list" ng-if="debts.debts.length > 0 && currentUser.id != user.id"  >
+            <div class="item item-divider">
+                Open Debts
+            </div>
+
+            <ion-item ng-repeat="debt in debts.debts | matchTab:'':'all':user.id" ng-click="openDebt(debt.debtId)"
+                      class="item-icon-left ">
+                <div ng-if="debt.debtor == currentUser.id && (debt.debtor == currentUser.id || debt.creditor == currentUser.id ) ">
+                    <i class="icon ion-arrow-down-a assertive"></i>
+
+                    <p>
+                        <h2><b>{{debt.value.toFixed(2)}} {{debt.currency}}</b></h2>
+                        <h3>You owe <b>{{debt.creditor}} </b></h3>
+                        <h4>{{debt.description}} </h4>
+                        <h4 style="font-style:italic" class="dark"> {{dateFormatter.formatDate(debt.created)}} </h4>
+                    </p>
+
+                </div>
+                <div ng-if="debt.debtor != currentUser.id && (debt.debtor == currentUser.id || debt.creditor == currentUser.id )">
+                    <i class="icon ion-arrow-up-a balanced "></i>
+                    <p>
+                        <h2><b>{{debt.value.toFixed(2)}} {{debt.currency}}</b></h2>
+                        <h3><b>{{debt.debtor}} </b> owes you</h3>
+                        <h4>{{debt.description}} </h4>
+                        <h4 style="font-style:italic" class="dark">{{dateFormatter.formatDate(debt.created)}} </h4>
+                    </p>
+
+                </div>
+            </ion-item>
+            <div class="item item-divider">
+                Resolved Debts
+            </div>
+            <ion-item ng-repeat="debt in debts.debts  | history:''" ng-click="openDebt(debt.debtId)"
+                      class="item-icon-left "  >
+                <div ng-if="debt.debtor != user.id && (debt.debtor == currentUser.id || debt.creditor == currentUser.id) ">
+                    <i class="icon ion-ios7-upload dark"></i>
+
+                    <p>
+                        <h2><b>{{debt.originalValue.toFixed(2)}} {{debt.currency}}</b></h2>
+                        <h3>You payed <b>{{debt.creditor}} </b></h3>
+                        <h4>{{debt.description}} </h4>
+                        <h4 style="font-style:italic" class="dark">created: {{dateFormatter.formatDate(debt.created)}} </h4>
+                        <h4 style="font-style:italic" class="dark">resolved: {{dateFormatter.formatDate(debt.modified)}} </h4>
+                    </p>
+
+                </div>
+                <div ng-if="debt.debtor == user.id && (debt.debtor == currentUser.id || debt.creditor == currentUser.id)">
+                    <i class="icon ion-ios7-download dark "></i>
+
+                    <p>
+                        <h2><b>{{debt.originalValue.toFixed(2)}} {{debt.currency}}</b></h2>
+                        <h3><b>{{debt.debtor}} </b> payed you</h3>
+                        <h4>{{debt.description}} </h4>
+                        <h4 style="font-style:italic" class="dark">created: {{dateFormatter.formatDate(debt.created)}} </h4>
+                        <h4 style="font-style:italic" class="dark">resolved: {{dateFormatter.formatDate(debt.modified)}} </h4>
+                    </p>
+                </div>
+            </ion-item>
+        </ion-list>
+
+        <div ng-if="debts && user && currentUser.id == user.id" class="list card">
+            <a class="item item-icon-left item-icon-right" ui-sref="app.debts({userId: user.id})"> <!-- TODO pass filter details -->
+                <i class="icon ion-card"></i>
+                <span >My debts </span>
+                <i class="icon ion-chevron-right icon-accessory"></i></a>
+        </div>
+
+
+    </ion-content>
+</ion-view>

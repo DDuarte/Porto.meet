@@ -1,0 +1,120 @@
+<div class="modal">
+    <ion-header-bar class="bar bar-header bar-positive">
+        <h1 class="title">Alter Debt</h1>
+        <button class="button button-clear button-primary" ng-click="closeDebtModal()">Close</button>
+    </ion-header-bar>
+    <ion-content class="has-header list card">
+        <div class="item item-avatar item-icon-right">
+           <img ng-if="debt.debtor == user.id && debt.creditorAvatar != null" ng-src="{{debt.creditorAvatar}}"/>
+           <img ng-if="debt.debtor == user.id && debt.creditorAvatar == null" ng-src="http://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y"/>
+
+           <img ng-if="debt.debtor != user.id && debt.debtorAvatar != null" ng-src="{{debt.debtorAvatar}}"/>
+           <img ng-if="debt.debtor != user.id && debt.debtorAvatar == null" ng-src="http://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y"/>
+
+            <div ng-if="debt.debtor == user.id">
+                <h3><b>You owe {{debt.creditor}} </b></h3>
+                <h4>{{debt.description}} </h4>
+                <h4 style="font-style:italic" class="dark"> created: {{dateFormatter.formatDate(debt.created)}} </h4>
+                <h4 style="font-style:italic" class="dark"> modified: {{dateFormatter.formatDate(debt.created)}} </h4>
+
+                <i class="icon ion-arrow-down-a assertive "></i>
+
+            </div>
+            <div ng-if="debt.debtor != user.id">
+                <h3><b>{{debt.debtor}} </b> owes you</h3>
+                <h4>{{debt.description}} </h4>
+                <h4 style="font-style:italic" class="dark"> created: {{dateFormatter.formatDate(debt.created)}} </h4>
+                <h4 style="font-style:italic" class="dark"> modified: {{dateFormatter.formatDate(debt.modified)}} </h4>
+
+                <i class="icon ion-arrow-up-a balanced "></i>
+
+            </div>
+        </div>
+        <ion-item class="item-body"
+                  class="item-icon-left">
+
+            <div ng-if="debt.debtor == user.id">
+                <p>
+
+                <h2>Initial Amount: <b class="dark">{{debt.originalValue}} {{user.currency}}</b></h2>
+
+                <h2>Amount left: <b ng-class="modal.amount < 0 || modal.amount > debt.value ? 'assertive': 'assertive'">
+                    <span ng-if="!(modal.amount < 0 || modal.amount > debt.value)">{{debt.value - modal.amount}} </span>
+                    {{user.currency}}</b></h2>
+
+                <div class="row">
+                    <div class="col-30">
+                        <b>Resolved: </b>
+
+                        <label class="toggle toggle-balanced">
+                            <input type="checkbox" ng-init="resolved=false" ng-model="resolved"
+                                   ng-change="pushResolved(resolved)">
+
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
+                        <label  class="item-input">
+                            <b class="input-label"
+                               ng-class="modal.amount < 0 || modal.amount > debt.value ? 'assertive': ''">Ammount <br/>you<br/>
+                                payed </b>
+                            <b ng-if="resolved" class="assertive " class="assertive">{{modal.amount}}</b>
+                            <input  ng-if="!resolved"  type="number" ng-model="modal.amount">
+                        </label>
+
+                    </div>
+                </div>
+                </p>
+            </div>
+
+            <div ng-if="debt.debtor != user.id">
+                <p>
+
+                <h2>Initial Amount: <b class="dark">{{debt.originalValue}} {{user.currency}}</b></h2>
+
+                <h2>Amount left: <b ng-class="modal.amount < 0 || modal.amount > debt.value ? 'assertive': 'balanced'">
+                    <span ng-if="!(modal.amount < 0 || modal.amount > debt.value)">{{debt.value - modal.amount}} </span>
+                    {{user.currency}}</b></h2>
+
+                    <div class="col-30">
+                        <b>Resolved: </b>
+
+                        <label class="toggle toggle-balanced">
+                            <input type="checkbox" ng-init="resolved=false" ng-model="resolved"
+                                   ng-change="pushResolved(resolved)">
+
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
+                        <label class="item-input">
+                            <b class="input-label"
+                               ng-class="modal.amount < 0 || modal.amount > debt.value ? 'assertive': ''">Ammount <br/>you<br/>
+                                received</b>
+                            <b ng-if="resolved" class="balanced " class="assertive">{{modal.amount}}</b>
+                            <input ng-if="!resolved" type="number" ng-model="modal.amount">
+                        </label>
+
+                    </div>
+                </p>
+            </div>
+
+        </ion-item>
+
+
+        <div class="item">
+            <div class="button-bar" >
+                <a class="button button-balanced" ng-click=" !(modal.amount - debt.value == 0 || modal.resolved ) || resolveDebt(debt) "
+                   ng-class="modal.amount - debt.value == 0 || modal.resolved ? '' : 'button-disabled' ">Resolve</a>
+                <a class="button button-calm" ng-click="modal.amount - debt.value == 0 || modal.resolved ||  !modal.amount || debt.value - modal.amount < 0 || modal.amount < 0 || updateDebt(debt,modal.amount)"
+                   ng-class="modal.amount - debt.value == 0 || modal.resolved ||  !modal.amount || debt.value - modal.amount < 0 || modal.amount < 0 ? 'button-disabled' : '' ">Update</a>
+                <a class="button button-assertive" ng-click="deleteDebt(debt)" >Delete</a>
+            </div>
+        </div>
+    </ion-content>
+    <ion-footer-bar align-title="left" class="bar-balanced" ng-show="checkCheckedFriends()">
+        <button class="button button-clear button-full" ng-click="openCreateDebtModal()">
+            Ok
+        </button>
+    </ion-footer-bar>
+</div>
