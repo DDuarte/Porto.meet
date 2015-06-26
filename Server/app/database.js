@@ -22,7 +22,7 @@ module.exports = function (collections) {
 		var event = mongoose.model('Event', new mongoose.Schema({
 			Name: String,
 			Pass: String,
-			Admin: { type : mongoose.Types.ObjectId, ref: 'User'},
+			Admin: [{ type : mongoose.Types.ObjectId, ref: 'User'}],
 			Attendants: [{ type : mongoose.Types.ObjectId, ref: 'User'}]
 		}));
 		

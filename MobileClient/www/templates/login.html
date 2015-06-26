@@ -3,43 +3,9 @@
              back-button-icon="ion-ios7-arrow-back">
 </ion-nav-bar>
 
-<ion-view title="Payback">
+<ion-view title="Porto.meet">
     <ion-content>
         <div class="card">
-            <div class="item text-center item-divider">
-                Login with your local account
-            </div>
-            <div class="item item-text-wrap">
-                <form name="localLoginForm" ng-submit="localLoginForm.$valid && localLogin(user)">
-                    <div class="list">
-                        <label class="item item-input">
-                            <span class="input-label">User ID</span>
-                            <input type="text" ng-model="user.id" required>
-                        </label>
-                        <label class="item item-input">
-                            <span class="input-label">Password</span>
-                            <input type="password" ng-model="user.password" required>
-                        </label>
-                    </div>
-                    <div class="padding">
-                        <button class="button button-block button-positive"
-                                ng-class="{disabled: localLoginForm.$invalid || logging_in}">
-                            Login
-                        </button>
-                        <p class="text-center">
-                            <a href="#/signup">Don't have an account?</a>
-                        </p>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="padding">
-            <hr>
-        </div>
-        <div class="card">
-            <div class="item text-center item-divider">
-                Or
-            </div>
             <div class="item item-text-wrap">
                 <button class="button button-block button-positive" ng-class="{ disabled: logging_in }"
                         ng-click="facebookLogin()">

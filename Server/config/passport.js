@@ -1,6 +1,5 @@
 // config/passport.js
 
-var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var GoogleStrategy = require('passport-google').Strategy;
 
@@ -22,82 +21,6 @@ module.exports = function (passport) {
         });
 
     });
-
-    passport.use('local-signup', new LocalStrategy({
-            usernameField: 'id',
-            passwordField: 'password',
-            passReqToCallback: true
-        },
-        function (req, id, password, done) {
-
-            process.nextTick(function () {
-
-                if (!req.body.email)
-                    return done(null, false, { error: "Attribute 'email' is missing." });
-
-                var mailRegex  = /^[a-z0-9\._%\+\-]+@[a-z0-9\.\-]+\.[a-z]{2,6}$/;
-
-                if (!mailRegex.test(req.body.email))
-                    return done(null, false, { error: "Invalid email format." });
-
-                req.models.user.exists({ id: id }, function (err, exists) {
-
-                    if (err)
-                        return done(err);
-
-                    if (exists)
-                        return done(null, false, { error: "That id is already taken." });
-
-                    var email = req.body.email;
-                    req.models.user.exists({ email: email }, function (err, exists) {
-
-                        if (err)
-                            return done(err);
-
-                        if (exists)
-                            return done(null, false, { error: "That email is already taken." });
-
-                        var avatar = 'https://www.gravatar.com/avatar/' + crypto.MD5(email.trim().toLowerCase());
-
-                        req.models.user.create({
-                                id: id,
-                                passwordHash: password,
-                                email: email,
-                                avatar: avatar,
-                                currency: req.body.currency
-                            },
-                            function (err, userItem) {
-
-                                if (err)
-                                    return done(err);
-
-                                return done(null, userItem);
-                            });
-
-                    });
-                });
-
-            });
-        }));
-
-    passport.use('local-login', new LocalStrategy({
-            usernameField: 'id',
-            passwordField: 'password',
-            passReqToCallback: true
-        },
-        function (req, id, password, done) {
-
-            req.models.user.get(id, function (err, user) {
-
-                if (err || !user)
-                    return done(null, false, { error: "No user ID was found."});
-
-                if (user.passwordHash !== password)
-                    return done(null, false, { error: "Wrong password."});
-
-                return done(null, user);
-            });
-        }));
 
     // Facebook strategies =============================================================================================
 
