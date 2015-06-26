@@ -34,7 +34,7 @@ function protected_user_info(user, facebookAccount, googleAccount) {
     return ret;
 }
 
-module.exports = function (server, passport, fx, jwt) {
+module.exports = function (server, passport, jwt) {
     //server.all("/api/", validChecksum);
     //server.all("/api/*", validChecksum);
 
