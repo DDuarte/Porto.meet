@@ -12,12 +12,7 @@ var express = require('express'),
 
 var passport = require('passport');
 
-var orm = require("orm");
 var database = require("./app/database");
-
-var schedule = require('node-schedule');
-
-var fx = require("money");
 
 var jwt = require("jwt-simple");
 
@@ -28,9 +23,6 @@ var server = express();
 server.use(morgan({ format: 'dev', immediate: true }));
 
 // database connection
-server.use(orm.express("pg://abhihnahgxvxim:WTaDQYg7roQaOx0ieKNDoKZ-V-@ec2-54-197-238-242.compute-1.amazonaws.com:5432/d4ielacnr2v55l?ssl=true&pool=true", {
-    define: database
-}));
 
 // Add headers in order to circumvent the javascript same origin policy (to be removed in production)
 server.use(function (req, res, next) {
@@ -86,12 +78,9 @@ server.use(passport.session());
 
 // routes ==========================================
 
-require('./config/scheduler')(schedule, fx);
-
 require('./config/jwtAuth.js')(server);
 
 // load our routes and pass in our server and fully configured passport
-require('./app/routes.js')(server, passport, fx, jwt);
 
 // launch ==========================================
 var port = process.env.PORT || 1337;
