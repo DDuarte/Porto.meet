@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('PaybackApp', ['ionic', 'starter.controllers', 'restangular', 'ngCookies', 'dx'])
+angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', 'ngCookies', 'dx'])
 
     .run(function ($ionicPlatform, $cookieStore, AuthService) {
         $ionicPlatform.ready(function () {
@@ -111,8 +111,8 @@ angular.module('PaybackApp', ['ionic', 'starter.controllers', 'restangular', 'ng
     .config(function ($stateProvider, $urlRouterProvider, RestangularProvider, AuthServiceProvider) {
 
         // base API Url
-        RestangularProvider.setBaseUrl('https://payback-app.herokuapp.com/api');
-        //RestangularProvider.setBaseUrl('http://127.0.0.1:1337/api');
+        //RestangularProvider.setBaseUrl('https://payback-app.herokuapp.com/api');
+        RestangularProvider.setBaseUrl('http://127.0.0.1:1337/api');
 
         RestangularProvider.addFullRequestInterceptor(function (element, operation, what, url, headers) {
             return {
@@ -133,12 +133,6 @@ angular.module('PaybackApp', ['ionic', 'starter.controllers', 'restangular', 'ng
                 controller: 'LoginCtrl'
             })
 
-            .state('signup', {
-                url: '/signup',
-                templateUrl: 'templates/signup.html',
-                controller: 'SignupCtrl'
-            })
-
             .state('app', {
                 url: '/app',
                 abstract: true,
@@ -156,26 +150,6 @@ angular.module('PaybackApp', ['ionic', 'starter.controllers', 'restangular', 'ng
                 }
             })
 
-            .state('app.debts', {
-                url: '/users/:userId/debts/:initFilter/:openDebt',
-                views: {
-                    'app': {
-                        templateUrl: 'templates/debts.html',
-                        controller: 'DebtsCtrl'
-                    }
-                }
-            })
-
-            .state('app.friends', {
-                url: '/users/:userId/friends',
-                views: {
-                    'app': {
-                        templateUrl: 'templates/friends.html',
-                        controller: 'FriendsCtrl'
-                    }
-                }
-            })
-
             .state('app.map', {
                 url: '/map',
                 views: {
@@ -189,4 +163,3 @@ angular.module('PaybackApp', ['ionic', 'starter.controllers', 'restangular', 'ng
         // if none of the above states are matched, use this as the fallback
         $urlRouterProvider.otherwise('/login');
     });
-
