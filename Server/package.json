@@ -1,7 +1,7 @@
 {
-  "name": "PaybackServer",
+  "name": "PortoMeetServer",
   "version": "0.0.1",
-  "description": "PaybackServer",
+  "description": "PortoMeetServer",
   "main": "server.js",
   "contributors": [
     {
@@ -9,22 +9,15 @@
       "email": "dnpd.dd@gmail.com",
       "url": "https://github.com/DDuarte"
     },
-    {
-      "name": "Francisco Maciel"
+	{
+      "name": "João Pedro"
     },
-    {
-      "name": "Luís Cleto",
-      "email": "luisccleto@gmail.com",
-      "url": "https://github.com/luiscleto"
+	{
+      "name": "José Pinto"
     },
-    {
-      "name": "Miguel Marques"
+	{
+      "name": "Pedro Silva"
     },
-    {
-      "name": "Ruben Cordeiro",
-      "email": "ruben.cordeiro.eng@gmail.com",
-      "url": "https://github.com/SynapseR"
-    }
   ],
   "dependencies": {
     "async": "~0.8.0",
@@ -41,7 +34,6 @@
     "passport-google": "~0.3.0",
     "node-schedule": "~0.1.13",
     "orm": "2.1.8",
-    "pg": "2.5.0",
     "crypto-js": "3.1.2-3",
     "nedb": "~0.10.5",
     "jwt-simple": "~0.2.0",
@@ -51,10 +43,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/DDuarte/Payback.git"
+    "url": "https://github.com/DDuarte/Porto.meet.git"
   },
   "engines": {
-    "node": "0.10.x",
-    "npm": "1.3.x"
+    "node": "0.12.x",
+    "npm": "2.x.x"
   }
 }
