@@ -239,11 +239,11 @@ module.exports = function (server, passport, db, jwt) {
     
 	// DELETE /api/event/{:name}
 	server.delete('/api/events/:name', function(req, res, next){
-		db.collections.event.find({Name: req.params.name}, function(err, e){
+		db.collections.event.findOne({Name: req.params.name}, function(err, e){
 			if(err){
 				return res.json(500, err);
 			}else{
-				if(e.Admin === user._id){
+				if(e.Admin === req.user.id){
 					db.collections.event.remove(e, function(err, result){
 						if(err){
 							console.log("Error deleting event from database");
