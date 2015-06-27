@@ -518,6 +518,45 @@ module.exports = function (server, passport, db, jwt) {
         });
     });
 
+                return res.json(201, newEvent);
+        });
+    });
+    
+    server.post('/api/joinEvent', function(req, res){
+        if (req.body === undefined) {
+            return res.json(409, {error: "No body defined"});
+        }
+
+        if (req.body.name === undefined) {
+            return res.json(409, {error: "Attribute 'name' is missing."});
+        }
+
+        if (req.body.password === undefined) {
+            return res.json(409, {error: "Attribute 'password' is missing."});
+        }
+        
+        db.collections.event.find({Name: req.body.name}, function(err, e){
+            if(err){
+               return res.json(500, err);
+            } else if(!e){
+               return res.json(409, {error: "Event not found."});
+            }
+            
+            if(e.Pass !== req.body.password){
+               return res.json(409, {error: "Wrong event password."});
+            }
+            
+            if (e.Attendants.indexOf(req.user.id) > -1) {
+                return res.json(200, e);
+            } else {
+                e.Attendants.push(req.user.id);
+                e.save(function(err, res){
+                    if (err) 
+                        return res.json(500, err);
+                    else
+                        return res.json(200, e);
+                });
+            }
     // asynchronous version of the fuzzy evaluation function defined above
     function asyncFuzzyTest(searchTerm, user, callback) {
         var hay = user.id.toLowerCase(), i = 0, n = -1, l;
