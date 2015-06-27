@@ -112,7 +112,7 @@ angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', '
 
         // base API Url
         //RestangularProvider.setBaseUrl('https://payback-app.herokuapp.com/api');
-        RestangularProvider.setBaseUrl('http://127.0.0.1:1337/api');
+        RestangularProvider.setBaseUrl('http://localhost:1337/api');
 
         RestangularProvider.addFullRequestInterceptor(function (element, operation, what, url, headers) {
             return {
