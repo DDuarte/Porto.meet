@@ -518,6 +518,25 @@ module.exports = function (server, passport, db, jwt) {
         });
     });
 
+    server.post('/api/createEvent', function(){
+        if (req.body === undefined) {
+            return res.json(409, {error: "No body defined"});
+        }
+
+        if (req.body.name === undefined) {
+            return res.json(409, {error: "Attribute 'name' is missing."});
+        }
+
+        if (req.body.password === undefined) {
+            return res.json(409, {error: "Attribute 'password' is missing."});
+        }
+        
+        var newEvent = new db.collections.event({Name: req.body.name,Pass: req.body.password, Admin: [req.user.id], Attendants: []});
+        
+        newEvent.save(function(err, res){
+             if (err) 
+                return res.json(500, err);
+             else
                 return res.json(201, newEvent);
         });
     });
@@ -557,6 +576,9 @@ module.exports = function (server, passport, db, jwt) {
                         return res.json(200, e);
                 });
             }
+        });
+    });
+        
     // asynchronous version of the fuzzy evaluation function defined above
     function asyncFuzzyTest(searchTerm, user, callback) {
         var hay = user.id.toLowerCase(), i = 0, n = -1, l;
