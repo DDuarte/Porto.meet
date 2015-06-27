@@ -38,7 +38,7 @@ angular.module('starter.controllers', [])
             }).then(function (data) {
                 AuthService.login(data.user, data.access_token);
                 $ionicLoading.hide();
-                $state.go('app.debts', { userId: data.user.id, initFilter: "", openDebt: -1 });
+                $state.go('app.welcome', { userId: data.user.id, initFilter: "" });
             }, function (response) {
                 $ionicLoading.hide();
                 AlertPopupService.createPopup("Error", response.data.error);
@@ -60,7 +60,7 @@ angular.module('starter.controllers', [])
                     }).then(function (data) {
                             AuthService.login(data.user, data.access_token);
                             $ionicLoading.hide();
-                            $state.go('app.debts', { userId: data.user.id});
+                            $state.go('app.welcome', { userId: data.user.id});
                         },
                         function (response) {
                             $ionicLoading.hide();
@@ -71,7 +71,7 @@ angular.module('starter.controllers', [])
                                 }).then(function (data) {
                                     AuthService.login(data.user, data.access_token);
                                     $ionicLoading.hide();
-                                    $state.go('app.debts', { userId: data.user.id });
+                                    $state.go('app.welcome', { userId: data.user.id });
                                 }, function (response) {
                                     $ionicLoading.hide();
                                     AlertPopupService.createPopup("Error", response.data.error);
@@ -97,7 +97,7 @@ angular.module('starter.controllers', [])
                     }).then(function (data) {
                             AuthService.login(data.user, data.access_token);
                             $ionicLoading.hide();
-                            $state.go('app.debts', { userId: data.user.id});
+                            $state.go('app.welcome', { userId: data.user.id});
                         },
                         function (response) {
                             $ionicLoading.hide();
@@ -108,7 +108,7 @@ angular.module('starter.controllers', [])
                                 }).then(function (data) {
                                     AuthService.login(data.user, data.access_token);
                                     $ionicLoading.hide();
-                                    $state.go('app.debts', { userId: data.user.id });
+                                    $state.go('app.welcome', { userId: data.user.id });
                                 }, function (response) {
                                     $ionicLoading.hide();
                                     AlertPopupService.createPopup("Error", response.data.error);
@@ -140,37 +140,8 @@ angular.module('starter.controllers', [])
         }
     })
 
-    .filter('matchTab', function(AuthService) {
-        return function(  items ,searchText,filter, userId) {
-            var search = searchText.toLowerCase();
-            var filtered = [];
-            angular.forEach(items, function(item) {
-                if (AuthService.currentUser() && item.value != 0 && (item.debtor ==  AuthService.currentUser().id || item.creditor == AuthService.currentUser().id)) {
-                    if (filter == 'owed' && item.debtor == userId && item.debtor.toLowerCase().indexOf(search) > -1)
-                        filtered.push(item);
-                    else if (filter == 'own' && item.debtor != userId && item.debtor.toLowerCase().indexOf(search) > -1)
-                        filtered.push(item);
-                    else if (filter == 'all'&& (item.debtor.indexOf(search) > -1|| item.debtor.toLowerCase().indexOf(search) > -1) )
-                        filtered.push(item);
-                }
+    .controller('WelcomeCtrl', function ($scope, $state, $stateParams, Restangular) {
 
-            });
-            return filtered;
-        };
-    })
-
-    .filter('history', function(AuthService) {
-        return function( items, searchText ) {
-            var filtered = [];
-            angular.forEach(items, function(item) {
-                if (item.value == 0 && (item.debtor.indexOf(searchText.toLowerCase()) > -1|| item.debtor.toLowerCase().indexOf(searchText.toLowerCase()) > -1)  && (item.debtor ==  AuthService.currentUser().id || item.creditor == AuthService.currentUser().id)) {
-                        filtered.push(item);
-                }
-
-            });
-
-            return filtered;
-        };
     })
 
     .controller('MapCtrl', function ($scope, $ionicLoading, AlertPopupService) {
@@ -184,7 +155,7 @@ angular.module('starter.controllers', [])
             bounds: {},
             draggable: "true"
             //maps.MapTypeId.ROADMAP
-        };
+    };
 
         function initialize() {
             var mapOptions = {
