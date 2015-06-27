@@ -215,6 +215,8 @@ module.exports = function (server, passport, db, jwt) {
                 else
                     return res.json(201, newEvent);
                 });
+            } else {
+                return res.json(409, {error: "Event with the same name already exists."});
             }
         });
     });
