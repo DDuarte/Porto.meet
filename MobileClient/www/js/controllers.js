@@ -275,7 +275,7 @@ angular.module('starter.controllers', [])
         
             for (i = 0; i < pois.length; i++) {  
               marker = new google.maps.Marker({
-                position: new google.maps.LatLng(pois[i][1], pois[i][2]),
+                position: new google.maps.LatLng(pois[i][2], pois[i][1]),
                 map: map
               });
         
@@ -289,8 +289,9 @@ angular.module('starter.controllers', [])
             
             for (i = 0; i < users.length; i++) {  
               marker = new google.maps.Marker({
-                position: new google.maps.LatLng(users[i][1], users[i][2]),
-                map: map
+                position: new google.maps.LatLng(users[i][2], users[i][1]),
+                map: map,
+                icon: "http://ruralshores.com/assets/marker-icon.png"
               });
         
               google.maps.event.addListener(marker, 'click', (function(marker, i) {
