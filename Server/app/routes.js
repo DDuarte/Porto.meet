@@ -401,7 +401,7 @@ module.exports = function (server, passport, db, jwt) {
         }
     });
     
-	// POST /api/user/
+	// POST /api/users/
     server.post('/api/users/:id/location', function (req, res, next) {
        var email = req.params.id;
        var lat = req.body.lat;
@@ -421,6 +421,28 @@ module.exports = function (server, passport, db, jwt) {
             }
         });
     });
+	
+	// GET /api/events/:name/users
+	server.get('/api/events/:name/users', function(req,res,next){
+		var eventName = req.params.name;
+		db.collections.event.findOne({Name: eventName}, function(err, event){
+			if(err){
+				return res.json(500, {"Error": "Event not found"});
+			} else{
+				db.collections.user.find({ Email : { $in : event.Attendants}}, function(err, users){
+					if(err){
+						return res.json(500, {"Error":"Query error"});
+					}else if (!users || users.length == 0){
+						return res.json(409, {error: "No attendants found."});
+					}else{
+						var result = _.map(users, function(user) { return _.pick(user, 'Name', 'Position'); });
+						return res.json(result);
+					}
+				});
+			}
+		});
+		
+	});
 	
     // asynchronous version of the fuzzy evaluation function defined above
     function asyncFuzzyTest(searchTerm, user, callback) {
