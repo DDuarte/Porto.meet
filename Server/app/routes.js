@@ -316,10 +316,10 @@ module.exports = function (server, passport, db, jwt) {
                return res.json(409, {error: "Event not found."});
             }
             
-            var i = e.Attendants.indexOf(req.user.id);
+            var i = e.Attendants.indexOf(req.user.Email);
             if (i > -1) {
                 e.Attendants.splice(i, 1);
-                e.save(function(err, res){
+                e.save(function(err, e){
                     if (err) 
                         return res.json(500, err);
                 });
