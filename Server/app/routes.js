@@ -662,7 +662,7 @@ module.exports = function (server, passport, jwt) {
     });
 
     // DELETE /api/users/{id}
-    server.del('/api/users/:id', function (req, res) {
+    server.delete('/api/users/:id', function (req, res) {
 
         req.models.user.get(req.params.id, function (err, user) {
 
