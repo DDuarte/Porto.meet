@@ -221,6 +221,27 @@ module.exports = function (server, passport, db, jwt) {
         });
     });
     
+	// DELETE /api/event/{:name}
+	server.delete('/api/events/:name', function(req, res, next){
+		db.collections.event.find({Name: req.params.name}, function(err, e){
+			if(err){
+				return res.json(500, err);
+			}else{
+				if(e.Admin === user._id){
+					db.collections.event.remove(e, function(err, result){
+						if(err){
+							console.log("Error deleting event from database");
+							return res.json(500,err);
+						}
+						else{
+							return res.json(200, result);
+						}
+					});
+				}
+			}
+		});
+	});
+	
 	// POST /api/event/join
     server.post('/api/events/join', function(req, res){
         if (req.body === undefined) {
