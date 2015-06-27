@@ -106,7 +106,7 @@ module.exports = function (server, passport, db, jwt) {
 						}
 						
 						var expires = moment().add('days', 7).valueOf();
-                        var token = generateToken(user.email, expires);
+                        var token = generateToken(profile.email, expires);
 						var ret = {
                             access_token: token,
 							user: user
@@ -171,7 +171,7 @@ module.exports = function (server, passport, db, jwt) {
 						}
 						
 						var expires = moment().add('days', 7).valueOf();
-                        var token = generateToken(user.email, expires);
+                        var token = generateToken(profile.email, expires);
 						var ret = {
                             access_token: token,
 							user: user
@@ -206,14 +206,14 @@ module.exports = function (server, passport, db, jwt) {
          db.collections.event.find({Name: req.body.name}, function(err, e){
             if(err){
                return res.json(500, err);
-            } else if(!e){
+            } else if(!e || e.length == 0){
                 var newEvent = new db.collections.event({Name: req.body.name,Pass: req.body.password, Admin: [req.user.id], Attendants: []});
         
-                newEvent.save(function(err, res){
-                if (err) 
-                    return res.json(500, err);
-                else
-                    return res.json(201, newEvent);
+                newEvent.save(function(err, newEvent){
+                    if (err)
+                        return res.json(500, err);
+                    else
+                        return res.json(201, newEvent);
                 });
             } else {
                 return res.json(409, {error: "Event with the same name already exists."});
@@ -454,5 +454,4 @@ module.exports = function (server, passport, db, jwt) {
 
         return token;
     }
-    
 };
