@@ -214,12 +214,12 @@ module.exports = function (server, passport, db, jwt) {
                         return res.json(500, err);
                 });
                 
-                db.collections.user.find({Name: req.user.name},function(err, u){
-                    if(err){
+                db.collections.user.findOne({Email: req.user.Email},function(err, u){
+                    if (err) {
                         return res.json(500, err); 
                     }
                     
-                    if(!u || u.length == 0){
+                    if (!u) {
                         return res.json(409, {error: "User not found."});
                     }
                     
@@ -311,12 +311,12 @@ module.exports = function (server, passport, db, jwt) {
         });
     });
     
-	// POST /api/event/leave
+	// POST /api/event/:name/leave
     server.post('/api/events/:name/leave', function(req, res){        
-        db.collections.event.find({Name: req.params.name}, function(err, e){
+        db.collections.event.findOne({Name: req.params.name}, function(err, e){
             if(err){
                return res.json(500, err);
-            } else if(!e || e.length == 0){
+            } else if (!e){
                return res.json(409, {error: "Event not found."});
             }
             
@@ -328,18 +328,19 @@ module.exports = function (server, passport, db, jwt) {
                         return res.json(500, err);
                 });
             }
-            
-            db.collections.user.find({Name: req.user.name},function(err, u){
-                if(err){
+
+            console.log(req.user);
+            db.collections.user.findOne({Email: req.user.Email}, function(err, u){
+                if (err){
                     return res.json(500, err); 
                 }
                 
-                if(!u || u.length == 0){
+                if (!u){
                     return res.json(409, {error: "User not found."});
                 }
                 
                 u.CurrentEvent = "";
-                u.save(function(err, res){
+                u.save(function(err, u){
                     if (err) 
                         return res.json(500, err);
                     else

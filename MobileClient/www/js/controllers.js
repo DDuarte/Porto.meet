@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-    .controller('AppCtrl', function ($scope, $state, $ionicSideMenuDelegate, $cookieStore, AuthService) {
+    .controller('AppCtrl', function ($scope, $state, $ionicSideMenuDelegate, $cookieStore, AuthService, Restangular) {
 
         $scope.toggleLeft = function () {
             $ionicSideMenuDelegate.toggleLeft();
@@ -26,9 +26,15 @@ angular.module('starter.controllers', [])
         };
 
         $scope.abandon = function () {
-            // TODO: request abandon group
-            AuthService.setAdmin(false);
-            $state.go('welcome');
+            Restangular.all('events').one(AuthService.currentUser.event).all('leave').post({
+            }).then(function (data) {
+                AuthService.setAdmin(false);
+                $state.go('welcome');
+            },
+            function (response) {
+                AuthService.setAdmin(false);
+                $state.go('welcome');
+            });
         };
 
         $scope.isAdmin = AuthService.isAdmin();
@@ -72,23 +78,6 @@ angular.module('starter.controllers', [])
 
     .controller('LoginCtrl', function ($scope, $state, $ionicLoading, Restangular, AuthService, AlertPopupService) {
 
-        $scope.localLogin = function (user) {
-            $ionicLoading.show({
-                template: 'Logging in...'
-            });
-            Restangular.all('login').all('local').post({
-                id: user.id,
-                password: CryptoJS.SHA256(user.password).toString(CryptoJS.enc.Hex)
-            }).then(function (data) {
-                AuthService.login(data.user, data.access_token);
-                $ionicLoading.hide();
-                $state.go('welcome', { userId: data.user.id });
-            }, function (response) {
-                $ionicLoading.hide();
-                AlertPopupService.createPopup("Error", response.data.error);
-            });
-        };
-
         $scope.facebookLogin = function () {
             OAuth.popup("facebook", {authorize:{scope:"public_profile user_friends email"}}, function (err, res) {
                 if (err) {
@@ -102,27 +91,22 @@ angular.module('starter.controllers', [])
                     Restangular.all('login').all('facebook').post({
                         token: res.access_token
                     }).then(function (data) {
-                            AuthService.login(data.user, data.access_token);
-                            $ionicLoading.hide();
-                            $state.go('welcome', { userId: data.user.id});
-                        },
-                        function (response) {
-                            $ionicLoading.hide();
+                        AuthService.login(data.user, data.access_token);
+                        $ionicLoading.hide();
+                        console.log(data.user);
 
-                            if (response.data.error == "User not found") {
-                                Restangular.all('signup').all('facebook').post({
-                                    token: res.access_token
-                                }).then(function (data) {
-                                    AuthService.login(data.user, data.access_token);
-                                    $ionicLoading.hide();
-                                    $state.go('welcome', { userId: data.user.id });
-                                }, function (response) {
-                                    $ionicLoading.hide();
-                                    AlertPopupService.createPopup("Error", response.data.error);
-                                });
-                            } else
-                                AlertPopupService.createPopup("Error", response.data.error);
-                        });
+                        if (data.user && data.user.CurrentEvent) {
+                            AuthService.currentUser.event = data.user.CurrentEvent;
+                            $state.go('app.map', {userId: data.user.id});
+                        } else {
+                            AuthService.currentUser.event = '';
+                            $state.go('welcome', {userId: data.user.id});
+                        }
+                    },
+                    function (response) {
+                        $ionicLoading.hide();
+                        AlertPopupService.createPopup("Error", response.data.error);
+                    });
                 }
             });
         };
@@ -139,27 +123,14 @@ angular.module('starter.controllers', [])
                     Restangular.all('login').all('google').post({
                         token: res.access_token
                     }).then(function (data) {
-                            AuthService.login(data.user, data.access_token);
-                            $ionicLoading.hide();
-                            $state.go('welcome', { userId: data.user.id});
-                        },
-                        function (response) {
-                            $ionicLoading.hide();
-
-                            if (response.data.error == "User not found") {
-                                Restangular.all('signup').all('google').post({
-                                    token: res.access_token
-                                }).then(function (data) {
-                                    AuthService.login(data.user, data.access_token);
-                                    $ionicLoading.hide();
-                                    $state.go('welcome', { userId: data.user.id });
-                                }, function (response) {
-                                    $ionicLoading.hide();
-                                    AlertPopupService.createPopup("Error", response.data.error);
-                                });
-                            } else
-                                AlertPopupService.createPopup("Error", response.data.error);
-                        });
+                        AuthService.login(data.user, data.access_token);
+                        $ionicLoading.hide();
+                        $state.go('welcome', { userId: data.user.id});
+                    },
+                    function (response) {
+                        $ionicLoading.hide();
+                        AlertPopupService.createPopup("Error", response.data.error);
+                    });
                 }
             });
         };
@@ -184,7 +155,7 @@ angular.module('starter.controllers', [])
         }
     })
 
-    .controller('WelcomeCtrl', function ($scope, $state, $stateParams, Restangular, AuthService) {
+    .controller('WelcomeCtrl', function ($scope, $state, $stateParams, $ionicLoading, AlertPopupService, Restangular, AuthService) {
         $scope.data = {
             groupName: '',
             groupPass: ''
@@ -193,13 +164,47 @@ angular.module('starter.controllers', [])
         $scope.createGroup = function () {
             console.log("Create", $scope.data.groupName, $scope.data.groupPass);
 
-            AuthService.setAdmin(true);
-            $state.go('app.map', { userId: 1 });
+            $ionicLoading.show({
+                template: 'Creating event...'
+            });
+            Restangular.all('events').post({
+                name: $scope.data.groupName,
+                password: $scope.data.groupPass
+            }).then(function (data) {
+                $ionicLoading.hide();
+                console.log(data);
+                AuthService.setAdmin(true);
+                AuthService.currentUser.event = data.Name;
+                $state.go('app.map', { userId: 1 });
+            }, function (err) {
+                $ionicLoading.hide();
+
+                if (err.data && err.data.error) {
+                    AlertPopupService.createPopup("Error", err.data.error);
+                } else {
+                    AlertPopupService.createPopup("Error", JSON.stringify(err));
+                }
+            });
         };
 
         $scope.joinGroup = function () {
             console.log("Join", $scope.data.groupName, $scope.data.groupPass);
-            $state.go('app.map', { userId: 1 });
+
+            $ionicLoading.show({
+                template: 'Joining event...'
+            });
+            Restangular.all('events').post({
+                name: $scope.data.groupName,
+                password: $scope.data.groupPass
+            }).then(function (data) {
+                $ionicLoading.hide();
+                console.log(data);
+                AuthService.setAdmin(true);
+                $state.go('app.map', { userId: 1 });
+            }, function (err) {
+                $ionicLoading.hide();
+                AlertPopupService.createPopup("Error", JSON.stringify(err));
+            });
         };
     })
 
@@ -210,7 +215,7 @@ angular.module('starter.controllers', [])
                 email: 'joaquina@example.com',
                 avatar: 'img/ionic.png'
             }, {
-                name: 'Joï¿½o',
+                name: 'João',
                 email: 'joao@example.com',
                 avatar: 'img/ionic.png'
             }, {
