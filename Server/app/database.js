@@ -12,7 +12,7 @@ collections.user = mongoose.model('User', new mongoose.Schema({
 	Email: String,
 	Avatar: String,
 	Position: {Lat: Number , Long: Number},
-	Notifications: [String],
+	Notifications: [{Text: String, Position:{Lat: Number, Long: Number}}],
 	CurrentEvent: String
 }));
 		
