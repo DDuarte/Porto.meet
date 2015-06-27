@@ -1,5 +1,38 @@
-<ion-view title="{{user.id}}">
+<ion-view title="Configuration {{event.name}}">
     <ion-content has-header="true" padding="true">
+        <ul class="list">
 
+            <li class="item item-toggle">
+                Public visibility
+                <label class="toggle toggle-calm">
+                    <input type="checkbox" ng-change="visibilityChange" ng-model="publicVisibility">
+                    <div class="track">
+                        <div class="handle"></div>
+                    </div>
+                </label>
+            </li>
+
+            <li class="item item-button-right">
+                Delete
+                <button class="button button-assertive">
+                    <i class="icon ion-trash-b"></i>
+                </button>
+            </li>
+
+        </ul>
+
+        <div class="list">
+            <div class="item item-divider">
+                Users
+            </div>
+            <div class="item item-avatar item-button-right" ng-repeat="user in users">
+                <img ng-src="{{user.avatar}}">
+                <h2>{{user.name}}</h2>
+                <p>{{user.email}}</p>
+                <button class="button button-assertive button-clear" ng-click="kickUser($index)">
+                    <i class="icon ion-close-circled"></i>
+                </button>
+            </div>
+        </div>
     </ion-content>
 </ion-view>

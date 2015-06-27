@@ -171,7 +171,36 @@ angular.module('starter.controllers', [])
     })
 
     .controller('ConfigCtrl', function ($scope, $state, $stateParams, Restangular) {
+        $scope.users = [
+            {
+                name: 'Joaquina',
+                email: 'joaquina@example.com',
+                avatar: 'img/ionic.png'
+            }, {
+                name: 'Jo�o',
+                email: 'joao@example.com',
+                avatar: 'img/ionic.png'
+            }, {
+                name: 'Joana',
+                email: 'joana@example.com',
+                avatar: 'img/ionic.png'
+            }
+        ];
 
+        $scope.kickUser = function (idx) {
+            // TODO: request kick
+            if (idx > -1) {
+                $scope.users.splice(idx, 1);
+            }
+        };
+
+        $scope.deleteGroup = function () {
+            // TODO: request delete
+        };
+
+        $scope.visibilityChange = function () {
+            // TODO: request visibility change: $scope.publicVisibility
+        };
     })
 
     .controller('MapCtrl', function ($scope, $ionicLoading, AlertPopupService, $ionicSideMenuDelegate) {
