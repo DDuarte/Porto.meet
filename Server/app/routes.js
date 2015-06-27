@@ -654,4 +654,24 @@ module.exports = function (server, passport, db, jwt) {
             }
         });
     });
+    
+    server.post('/api/event/:id/notification', function (req, res, next) {
+       var name = req.params.id;
+       var text = req.body.message;
+       var long = req.body.long;
+       
+         db.collections.user.find({CurrentEvent: id}, {active:false} , {multi: true} , function(err, user) {
+            if(!err) {
+                user.Notifications.push(text);
+                user.save(function(err) {
+                    if(!err) {
+                        return res.json(500, {"Error":"Bad query"});
+                    }
+                    else {
+                         return res.json(200, {"Success":"True"});
+                    }
+                });
+            }
+        });
+    });
 };
