@@ -212,9 +212,25 @@ module.exports = function (server, passport, db, jwt) {
                 newEvent.save(function(err, newEvent){
                     if (err)
                         return res.json(500, err);
-                    else
-                        return res.json(201, newEvent);
                 });
+                
+                db.collections.user.find({Name: req.user.name},function(err, u){
+                    if(err){
+                        return res.json(500, err); 
+                    }
+                    
+                    if(!u || u.length == 0){
+                        return res.json(409, {error: "User not found."});
+                    }
+                    
+                    u.CurrentEvent = req.user.name;
+                    u.save(function(err, res){
+                        if (err) 
+                            return res.json(500, err);
+                    });
+                });
+                
+                return res.json(201, newEvent);
             } else {
                 return res.json(409, {error: "Event with the same name already exists."});
             }
@@ -259,7 +275,7 @@ module.exports = function (server, passport, db, jwt) {
         db.collections.event.find({Name: req.body.name}, function(err, e){
             if(err){
                return res.json(500, err);
-            } else if(!e){
+            } else if(!e || e.length == 0){
                return res.json(409, {error: "Event not found."});
             }
             
@@ -280,7 +296,7 @@ module.exports = function (server, passport, db, jwt) {
                     return res.json(500, err); 
                 }
                 
-                if(!u){
+                if(!u || u.length == 0){
                     return res.json(409, {error: "User not found."});
                 }
                 
@@ -308,7 +324,7 @@ module.exports = function (server, passport, db, jwt) {
         db.collections.event.find({Name: req.body.name}, function(err, e){
             if(err){
                return res.json(500, err);
-            } else if(!e){
+            } else if(!e || e.length == 0){
                return res.json(409, {error: "Event not found."});
             }
             
@@ -326,7 +342,7 @@ module.exports = function (server, passport, db, jwt) {
                     return res.json(500, err); 
                 }
                 
-                if(!u){
+                if(!u || u.length == 0){
                     return res.json(409, {error: "User not found."});
                 }
                 
