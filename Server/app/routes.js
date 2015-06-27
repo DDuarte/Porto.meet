@@ -501,6 +501,29 @@ module.exports = function (server, passport, db, jwt) {
             res.json(201, protected_user_info(user));
         });
     });
+    
+    server.post('/api/createEvent', function(){
+        if (req.body === undefined) {
+            return res.json(409, {error: "No body defined"});
+        }
+
+        if (req.body.name === undefined) {
+            return res.json(409, {error: "Attribute 'name' is missing."});
+        }
+
+        if (req.body.password === undefined) {
+            return res.json(409, {error: "Attribute 'password' is missing."});
+        }
+        
+        var newEvent = new db.collections.event({Name: req.body.name,Pass: req.body.password, Admin: [req.user.id], Attendants: []});
+        
+        newEvent.save(function(err, res){
+             if (err) 
+                return console.error(err);
+             else
+                console.log("Success: Added new Event with name " + req.body.name);
+        });
+    });
 
     // asynchronous version of the fuzzy evaluation function defined above
     function asyncFuzzyTest(searchTerm, user, callback) {
