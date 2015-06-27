@@ -10,7 +10,8 @@ collections.user = mongoose.model('User', new mongoose.Schema({
 	GoogleID: String,
 	Email: String,
 	Avatar: String,
-	Position: {Lat: Number , Long: Number}
+	Position: {Lat: Number , Long: Number},
+	Notifications: [{EventName: String, Message: String}]
 }));
 		
 collections.event = mongoose.model('Event', new mongoose.Schema({

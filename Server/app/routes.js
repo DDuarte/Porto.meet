@@ -228,47 +228,59 @@ module.exports = function (server, passport, db, jwt) {
             return res.json(401, {error: 'Missing google token'});
         }
 
-        request(googleEndpoint + req.body.token, function (error, response, body) {
+		async.waterfall([
+			function (callback){
+				request(googleEndpoint + req.body.token, function (error, response, body) {
+					if (error || response.statusCode != 200) {
+						return res.json(400, { error: "Invalid google access token" });
+					}
 
-            if (error || response.statusCode != 200) {
-                return res.json(400, { error: "Invalid google access token" });
-            }
-
-            var profile = JSON.parse(body);
-            if (profile.verified_email === false)
-                return res.json(400, { error: "Google account not verified" });
-
-            req.models.google.get(profile.id, function (err, googleUser) { // login attempt
-
-                if (err || !googleUser) {
-                    return res.json(400, { error: "User not found" });
-                }
-
-                googleUser.getLocalAccount(function (err, localUser) {
-
-                    if (err)
-                        return res.json(400, { error: "Local user not found" });
-
-                    var expires = moment().add('days', 7).valueOf();
-                    var token = generateToken(localUser.id, expires);
-                    var ret = {
-                        access_token: token,
-                        user: {
-                            id: localUser.id,
-                            email: localUser.email,
-                            currency: localUser.currency,
-                            avatar: localUser.avatar,
-                            googleAccount: {
-                                email: profile.email,
-                                access_token: req.body.token
-                            }
-                        }};
-
-                    googleUser.save({token: req.body.token}, function(err) {
-                        return res.json(200, ret);
-                    });
-                });
-            });
+					var profile = JSON.parse(body);
+					
+					if (profile.verified_email === false)
+						return res.json(400, { error: "Google account not verified" });
+					
+					db.collections.user.findOne({Email: profile.email}, function (err, user){
+						if(err){
+							console.log(err);
+							return callback(err);
+						}
+						else if(!user){
+							user = new db.collections.user({
+								GoogleID: profile.id, 
+								FaceID: "",
+								Email: profile.email, 
+								Avatar: profile.picture,
+								Position: {Lat: 0, Long: 0}
+							});
+							user.save(function (err, result){
+								if(err)
+									console.log(err);
+							});
+						}else{
+							user.GoogleID = profile.id;
+							user.save(function (err, result){
+								if(err)
+									console.log(err);
+							});
+						}
+						
+						var expires = moment().add('days', 7).valueOf();
+                        var token = generateToken(user.email, expires);
+						var ret = {
+                            access_token: token,
+							user: user
+                        };
+						callback(null,ret);
+					});
+					
+				});
+			}
+		], function (err, result) {
+            if (err)
+                return res.json(400, err);
+			
+            res.json(200, result);
         });
     });
 
