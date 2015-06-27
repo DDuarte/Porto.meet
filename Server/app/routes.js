@@ -283,20 +283,20 @@ module.exports = function (server, passport, db, jwt) {
                return res.json(409, {error: "Wrong event password."});
             }
             
-            if (!(e.Attendants.indexOf(req.user.id) > -1)) {
-                e.Attendants.push(req.user.id);
+            if (!(e.Attendants.indexOf(req.user.Email) > -1)) {
+                e.Attendants.push(req.user.Email);
                 e.save(function(err, res){
                     if (err) 
                         return res.json(500, err);
                 });
             }
                    
-            db.collections.user.find({Name: req.user.name},function(err, u){
+            db.collections.user.findOne({Email: req.user.Email},function(err, u){
                 if(err){
                     return res.json(500, err); 
                 }
                 
-                if(!u || u.length == 0){
+                if(!u){
                     return res.json(409, {error: "User not found."});
                 }
                 

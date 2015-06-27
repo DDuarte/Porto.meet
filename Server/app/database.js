@@ -20,7 +20,7 @@ collections.event = mongoose.model('Event', new mongoose.Schema({
 	Name: String,
 	Pass: String,
 	Admin: [{ type : mongoose.Schema.ObjectId, ref: 'User'}],
-	Attendants: [{ type : mongoose.Schema.ObjectId, ref: 'User'}]
+	Attendants: [String]
 }));
 
 exports.collections = collections;
