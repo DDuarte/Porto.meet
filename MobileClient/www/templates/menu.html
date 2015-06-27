@@ -23,15 +23,20 @@
                         {{currentUser.id}}<br><br>
                         {{currentUser.email}}
                     </a>
+                    <a class="item item-icon-left item-icon-right" nav-clear menu-close ui-sref="app.map" href="#">
+                        <i class="icon ion-map"></i>
+                        Map
+                        <i class="icon ion-chevron-right icon-accessory"></i>
+                    </a>
+                    <a class="item item-icon-left item-icon-right" ng-hide="!isAdmin" nav-clear menu-close ui-sref="app.config" href="#">
+                        <i class="icon ion-gear-a"></i>
+                        Configuration
+                        <i class="icon ion-chevron-right icon-accessory"></i>
+                    </a>
                     <a class="item item-icon-left item-icon-right" nav-clear menu-close
                        ui-sref="app.user({userId: currentUser.id})" href="#">
                         <i class="icon ion-person"></i>
                         Your Profile
-                        <i class="icon ion-chevron-right icon-accessory"></i>
-                    </a>
-                    <a class="item item-icon-left item-icon-right" nav-clear menu-close ui-sref="app.map" href="#">
-                        <i class="icon ion-map"></i>
-                        Map
                         <i class="icon ion-chevron-right icon-accessory"></i>
                     </a>
                     <a class="item item-icon-left item-icon-right" nav-clear menu-close ng-click="abandon()">

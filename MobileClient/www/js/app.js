@@ -63,6 +63,7 @@ angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', '
     .provider('AuthService', function AuthServiceProvider() {
 
         var currentUser;
+        var isAdmin;
 
         function token() {
             if (currentUser && currentUser.access_token)
@@ -101,6 +102,14 @@ angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', '
             };
 
             this.token = token;
+
+            this.setAdmin = function (admin) {
+                isAdmin = admin;
+            };
+
+            this.isAdmin = function () {
+                return isAdmin;
+            };
         }
 
         this.$get = ['$cookieStore', function ($cookieStore) {
@@ -152,6 +161,16 @@ angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', '
                     'app': {
                         templateUrl: 'templates/user.html',
                         controller: 'UserCtrl'
+                    }
+                }
+            })
+
+            .state('app.config', {
+                url: '/config',
+                views: {
+                    'app': {
+                        templateUrl: 'templates/config.html',
+                        controller: 'ConfigCtrl'
                     }
                 }
             })

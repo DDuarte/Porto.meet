@@ -23,7 +23,18 @@ angular.module('starter.controllers', [])
         $scope.logout = function () {
             AuthService.logout();
             $state.go('login');
-        }
+        };
+
+        $scope.abandon = function () {
+            // TODO: request abandon group
+            AuthService.setAdmin(false);
+            $state.go('welcome');
+        };
+
+        $scope.isAdmin = AuthService.isAdmin();
+        $scope.$watch(AuthService.isAdmin, function (isAdmin) {
+            $scope.isAdmin = isAdmin;
+        });
     })
 
     .controller('LoginCtrl', function ($scope, $state, $ionicLoading, Restangular, AuthService, AlertPopupService) {
@@ -140,7 +151,7 @@ angular.module('starter.controllers', [])
         }
     })
 
-    .controller('WelcomeCtrl', function ($scope, $state, $stateParams, Restangular) {
+    .controller('WelcomeCtrl', function ($scope, $state, $stateParams, Restangular, AuthService) {
         $scope.data = {
             groupName: '',
             groupPass: ''
@@ -148,6 +159,8 @@ angular.module('starter.controllers', [])
 
         $scope.createGroup = function () {
             console.log("Create", $scope.data.groupName, $scope.data.groupPass);
+
+            AuthService.setAdmin(true);
             $state.go('app.map', { userId: 1 });
         };
 
@@ -155,6 +168,10 @@ angular.module('starter.controllers', [])
             console.log("Join", $scope.data.groupName, $scope.data.groupPass);
             $state.go('app.map', { userId: 1 });
         };
+    })
+
+    .controller('ConfigCtrl', function ($scope, $state, $stateParams, Restangular) {
+
     })
 
     .controller('MapCtrl', function ($scope, $ionicLoading, AlertPopupService, $ionicSideMenuDelegate) {
@@ -168,7 +185,7 @@ angular.module('starter.controllers', [])
             bounds: {},
             draggable: "true"
             //maps.MapTypeId.ROADMAP
-    };
+        };
 
         function initialize() {
             var mapOptions = {
