@@ -470,17 +470,31 @@ module.exports = function (server, passport, db, jwt) {
                return res.json(409, {error: "Wrong event password."});
             }
             
-            if (e.Attendants.indexOf(req.user.id) > -1) {
-                return res.json(200, e);
-            } else {
+            if (!(e.Attendants.indexOf(req.user.id) > -1)) {
                 e.Attendants.push(req.user.id);
                 e.save(function(err, res){
+                    if (err) 
+                        return res.json(500, err);
+                });
+            }
+                   
+            db.collections.user.find({Name: req.user.name},function(err, u){
+                if(err){
+                    return res.json(500, err); 
+                }
+                
+                if(!u){
+                    return res.json(409, {error: "User not found."});
+                }
+                
+                u.CurrentEvent = req.body.name;
+                u.save(function(err, res){
                     if (err) 
                         return res.json(500, err);
                     else
                         return res.json(200, e);
                 });
-            }
+            });
         });
     });
     
@@ -512,6 +526,8 @@ module.exports = function (server, passport, db, jwt) {
             } else {
                 return res.json(200, e);
             }
+            
+            //Missing update on user's currentEvent to ""
         });
     });
     
