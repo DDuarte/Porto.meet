@@ -38,6 +38,7 @@ angular.module('starter.controllers', [])
             }).then(function (data) {
                 AuthService.login(data.user, data.access_token);
                 $ionicLoading.hide();
+                $state.go('app.debts', { userId: data.user.id, initFilter: "", openDebt: -1 });
             }, function (response) {
                 $ionicLoading.hide();
                 AlertPopupService.createPopup("Error", response.data.error);
@@ -59,6 +60,7 @@ angular.module('starter.controllers', [])
                     }).then(function (data) {
                             AuthService.login(data.user, data.access_token);
                             $ionicLoading.hide();
+                            $state.go('app.debts', { userId: data.user.id});
                         },
                         function (response) {
                             $ionicLoading.hide();
@@ -69,6 +71,7 @@ angular.module('starter.controllers', [])
                                 }).then(function (data) {
                                     AuthService.login(data.user, data.access_token);
                                     $ionicLoading.hide();
+                                    $state.go('app.debts', { userId: data.user.id });
                                 }, function (response) {
                                     $ionicLoading.hide();
                                     AlertPopupService.createPopup("Error", response.data.error);
@@ -94,6 +97,7 @@ angular.module('starter.controllers', [])
                     }).then(function (data) {
                             AuthService.login(data.user, data.access_token);
                             $ionicLoading.hide();
+                            $state.go('app.debts', { userId: data.user.id});
                         },
                         function (response) {
                             $ionicLoading.hide();
@@ -104,6 +108,7 @@ angular.module('starter.controllers', [])
                                 }).then(function (data) {
                                     AuthService.login(data.user, data.access_token);
                                     $ionicLoading.hide();
+                                    $state.go('app.debts', { userId: data.user.id });
                                 }, function (response) {
                                     $ionicLoading.hide();
                                     AlertPopupService.createPopup("Error", response.data.error);
