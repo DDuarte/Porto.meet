@@ -371,8 +371,8 @@ module.exports = function (server, passport, db, jwt) {
     });
      
 	// DELETE /api/user/{id}/notification
-	server.delete('/api/users/:id/notification', function(req,res,next){
-		var email = req.params.id;
+	server.delete('/api/users/notification', function(req,res,next){
+		var email = req.user.email;
 		db.collections.user.findOne({Email: email}, function (err, user){
 			if(err){
 				return res.json(500, {"Error":"Bad query", "Reason": err});
