@@ -185,11 +185,13 @@ module.exports = function (server, passport, db, jwt) {
 						}
 						else if(!user){
 							user = new db.collections.user({
+								Name: profile.name,
 								FaceID: profile.id, 
 								GoogleID: "",
 								Email: profile.email, 
 								Avatar: profilePicture.data.url,
-								Position: {Lat: 0, Long: 0}
+								Position: {Lat: 0, Long: 0},
+								CurrentEvent: ""
 							});
 							user.save(function (err, result){
 								if(err)
@@ -247,11 +249,13 @@ module.exports = function (server, passport, db, jwt) {
 						}
 						else if(!user){
 							user = new db.collections.user({
+								Name: profile.name,
 								GoogleID: profile.id, 
 								FaceID: "",
 								Email: profile.email, 
 								Avatar: profile.picture,
-								Position: {Lat: 0, Long: 0}
+								Position: {Lat: 0, Long: 0},
+								CurrentEvent: ""
 							});
 							user.save(function (err, result){
 								if(err)
@@ -511,29 +515,6 @@ module.exports = function (server, passport, db, jwt) {
             }
 
             res.json(201, protected_user_info(user));
-        });
-    });
-    
-    server.post('/api/createEvent', function(){
-        if (req.body === undefined) {
-            return res.json(409, {error: "No body defined"});
-        }
-
-        if (req.body.name === undefined) {
-            return res.json(409, {error: "Attribute 'name' is missing."});
-        }
-
-        if (req.body.password === undefined) {
-            return res.json(409, {error: "Attribute 'password' is missing."});
-        }
-        
-        var newEvent = new db.collections.event({Name: req.body.name,Pass: req.body.password, Admin: [req.user.id], Attendants: []});
-        
-        newEvent.save(function(err, res){
-             if (err) 
-                return console.error(err);
-             else
-                console.log("Success: Added new Event with name " + req.body.name);
         });
     });
 

@@ -6,12 +6,14 @@ mongoose.connect('mongodb://porto:meet@ds063779.mongolab.com:63779/portomeet');
 var collections = {};
 
 collections.user = mongoose.model('User', new mongoose.Schema({
+	Name: String,
 	FaceID: String,
 	GoogleID: String,
 	Email: String,
 	Avatar: String,
 	Position: {Lat: Number , Long: Number},
-	Notifications: [{EventName: String, Message: String}]
+	Notifications: [String],
+	CurrentEvent: String
 }));
 		
 collections.event = mongoose.model('Event', new mongoose.Schema({
