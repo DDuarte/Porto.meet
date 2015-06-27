@@ -289,57 +289,7 @@ module.exports = function (server, passport, db, jwt) {
 
     });
 
-    // GET /api/users/{id}/facebook
-    server.get('/api/users/:id/facebook', function (req, res) {
-
-        req.models.user.get(req.params.id, function (err, user) {
-
-            if (err || !user)
-                return res.json(404, { error: "User '" + req.params.id + "' does not exist" });
-
-            user.getFacebookAccount(function (err, facebookAccount) {
-
-                if (err)
-                    return res.json(500, err);
-
-                if (!facebookAccount)
-                    return res.json(404, { error: "User '" + req.params.id + "' does not have a linked facebook account" });
-
-                return res.json(200, {
-                    provider: "facebook",
-                    email: facebookAccount.email,
-                    displayName: facebookAccount.displayName
-                });
-            })
-        })
-    });
-
-    // GET /api/users/{id}/google
-    server.get('/api/users/:id/google', function (req, res) {
-
-        req.models.user.get(req.params.id, function (err, user) {
-
-            if (err || !user)
-                return res.json(404, { error: "User '" + req.params.id + "' does not exist" });
-
-            user.getGoogleAccount(function (err, googleAccount) {
-
-                if (err)
-                    return res.json(500, err);
-
-                if (!googleAccount)
-                    return res.json(404, { error: "User '" + req.params.id + "' does not have a linked google account" });
-
-                return res.json(200, {
-                    provider: "google",
-                    email: googleAccount.email,
-                    displayName: googleAccount.displayName
-                });
-            })
-        })
-    });
-
-    // GET /api/users
+	// GET /api/users
     server.get('/api/users', function (req, res) {
         req.models.user.find({}).run(function (err, users) {
             if (err) {
@@ -380,44 +330,8 @@ module.exports = function (server, passport, db, jwt) {
         });
     });
 
-    // POST /api/users
-    server.post('/api/users', function (req, res, next) {
-        if (req.body === undefined) {
-            return res.json(409, {error: "No body defined"});
-        }
-
-        if (req.body.id === undefined) {
-            return res.json(409, {error: "Attribute 'id' is missing."});
-        }
-
-        if (req.body.email === undefined) {
-            return res.json(409, {error: "Attribute 'email' is missing."});
-        }
-
-        if (!/\S+@\S+\.\S+/.test(req.body.email)) {
-            return res.json(409, {error: "Attribute 'email' is not a valid email address."});
-        }
-
-        req.models.user.create({
-            id: req.body.id,
-            email: req.body.email,
-            avatar: req.body.avatar // can be empty
-        }, function (err, user) {
-            if (err) {
-                if (err.code == 23505) { // unique_violation
-                    return next("Already exists");
-                } else if (err.msg == "invalid-password-length" || err.msg == "invalid-email-format") {
-                    return next(err.msg);
-                } else {
-                    res.json(500, err);
-                }
-            }
-
-            res.json(201, protected_user_info(user));
-        });
-    });
-
-    server.post('/api/createEvent', function(){
+	// POST /api/event
+    server.post('/api/events', function(){
         if (req.body === undefined) {
             return res.json(409, {error: "No body defined"});
         }
@@ -446,7 +360,8 @@ module.exports = function (server, passport, db, jwt) {
         });
     });
     
-    server.post('/api/joinEvent', function(req, res){
+	// POST /api/event/join
+    server.post('/api/events/join', function(req, res){
         if (req.body === undefined) {
             return res.json(409, {error: "No body defined"});
         }
@@ -498,7 +413,8 @@ module.exports = function (server, passport, db, jwt) {
         });
     });
     
-    server.post('/api/leaveEvent', function(req, res){
+	// POST /api/event/leave
+    server.post('/api/events/leave', function(req, res){
         if (req.body === undefined) {
             return res.json(409, {error: "No body defined"});
         }
@@ -531,7 +447,8 @@ module.exports = function (server, passport, db, jwt) {
         });
     });
     
-    server.post('/api/event/:id/notification', function (req, res, next) {
+	// POST /api/event/{id}/notification
+    server.post('/api/events/:id/notification', function (req, res, next) {
        var name = req.params.id;
        var text = req.body.message;
        var long = req.body.long;
@@ -544,13 +461,28 @@ module.exports = function (server, passport, db, jwt) {
                         return res.json(500, {"Error":"Bad query"});
                     }
                     else {
-                         return res.json(200, {"Success":"True"});
+                        return res.json(200, {"Success":"True"});
                     }
                 });
             }
         });
     });
+     
+	// DELETE /api/user/{id}/notification
+	server.delete('/api/users/:id/notification', function(req,res,next){
+		var email = req.params.id;
+		db.collections.user.findOne({Email: email}, function (err, user){
+			if(err){
+				return res.json(500, {"Error":"Bad query", "Reason": err});
+			}else{
+				user.Notifications.pull(0);
+				user.save();
+				return res.json(200, {"Success":"True"});
+			}
+		});
+	});
         
+		
     // asynchronous version of the fuzzy evaluation function defined above
     function asyncFuzzyTest(searchTerm, user, callback) {
         var hay = user.id.toLowerCase(), i = 0, n = -1, l;
@@ -589,6 +521,7 @@ module.exports = function (server, passport, db, jwt) {
         return token;
     }
     
+	// GET /api/pois
     server.get('/api/pois/', function (req, res, next) {
         var lat = req.query.lat;
         var long = req.query.long;
@@ -608,11 +541,12 @@ module.exports = function (server, passport, db, jwt) {
         }
     });
     
-    server.post('/api/user/:id/location', function (req, res, next) {
-       var id = req.params.id;
+	// POST /api/user/
+    server.post('/api/users/:id/location', function (req, res, next) {
+       var email = req.params.id;
        var lat = req.body.lat;
        var long = req.body.long;
-         db.collections.user.findOne({Email: id}, function(err, user) {
+         db.collections.user.findOne({Email: email}, function(err, user) {
             if(!err) {
                 user.Position = {Lat: lat , Long: long};
                 user.save(function(err) {
