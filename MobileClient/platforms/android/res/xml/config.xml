@@ -29,4 +29,7 @@
         <param name="android-package" value="com.ionic.keyboard.IonicKeyboard" />
     </feature>
     <access origin="https://oauth.io" />
+    <feature name="LocalNotification">
+        <param name="android-package" value="de.appplant.cordova.plugin.localnotification.LocalNotification" />
+    </feature>
 </widget>

@@ -34,6 +34,14 @@ module.exports = [
         "merges": [
             "OAuth"
         ]
+    },
+    {
+        "file": "plugins/de.appplant.cordova.plugin.local-notification/www/local-notification.js",
+        "id": "de.appplant.cordova.plugin.local-notification.LocalNotification",
+        "clobbers": [
+            "cordova.plugins.notification.local",
+            "plugin.notification.local"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -44,7 +52,8 @@ module.exports.metadata =
     "org.apache.cordova.geolocation": "0.3.7",
     "org.apache.cordova.inappbrowser": "0.4.0",
     "org.apache.cordova.statusbar": "0.1.3",
-    "com.oauthio.plugins.oauthio": "0.2.4"
+    "com.oauthio.plugins.oauthio": "0.2.4",
+    "de.appplant.cordova.plugin.local-notification": "0.8.1"
 }
 // BOTTOM OF METADATA
 });

@@ -36,6 +36,39 @@ angular.module('starter.controllers', [])
             $scope.isAdmin = isAdmin;
         });
     })
+    .controller("NotifyCtrl", function($scope, $cordovaLocalNotification, $timeout) {
+ 
+        $scope.add = function() {
+            var alarmTime = new Date();
+            alarmTime.setMinutes(alarmTime.getMinutes() + 1);
+            $cordovaLocalNotification.add({
+                id: "1234",
+                date: alarmTime,
+                message: "This is a message",
+                title: "This is a title",
+                autoCancel: true,
+                sound: null
+            }).then(function () {
+                console.log("The notification has been set");
+            });
+        };
+     
+        $scope.isScheduled = function() {
+            $cordovaLocalNotification.isScheduled("1234").then(function(isScheduled) {
+                alert("Notification 1234 Scheduled: " + isScheduled);
+            });
+        };
+        
+        var poll = function() {
+             $timeout(function() {
+                 //update your chart
+                 $scope.param1 = $scope.param2;
+                 $scope.param2++ ;
+                 poll();
+             }, 100*$scope.pollingperiod);
+         };     
+         poll();
+    })
 
     .controller('LoginCtrl', function ($scope, $state, $ionicLoading, Restangular, AuthService, AlertPopupService) {
 
@@ -217,14 +250,56 @@ angular.module('starter.controllers', [])
         };
 
         function initialize() {
+            
+            var pois =  [
+              ['Book', -8.614912, 41.14679, 1],
+              ['UP', -8.6155879497528, 41.147076493095, 2],
+            ];
+            
+            var users = [
+              ['A', -8.614, 41.14679, 1],
+              ['B', -8.616, 41.147076493095, 2],
+            ];
+            
             var mapOptions = {
-                center: new google.maps.LatLng(43.07493, -89.381388),
+                center: new google.maps.LatLng(-8.614912,41.14679),
                 zoom: 16,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
             var map = new google.maps.Map(document.getElementById("map"),
                 mapOptions);
 
+            var infowindow = new google.maps.InfoWindow();
+
+            var marker, i;
+        
+            for (i = 0; i < pois.length; i++) {  
+              marker = new google.maps.Marker({
+                position: new google.maps.LatLng(pois[i][1], pois[i][2]),
+                map: map
+              });
+        
+              google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                return function() {
+                  infowindow.setContent(pois[i][0]);
+                  infowindow.open(map, marker);
+                }
+              })(marker, i));
+            }
+            
+            for (i = 0; i < users.length; i++) {  
+              marker = new google.maps.Marker({
+                position: new google.maps.LatLng(users[i][1], users[i][2]),
+                map: map
+              });
+        
+              google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                return function() {
+                  infowindow.setContent(users[i][0]);
+                  infowindow.open(map, marker);
+                }
+              })(marker, i));
+            }
             // Stop the side bar from dragging when mousedown/tapdown on the map
             google.maps.event.addDomListener(document.getElementById('map'), 'mousedown', function (e) {
                 e.preventDefault();
