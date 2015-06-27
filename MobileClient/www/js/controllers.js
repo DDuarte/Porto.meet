@@ -429,7 +429,7 @@ angular.module('starter.controllers', [])
                     if (res) {
                         var lat = event.latLng.lat();
                         var long = event.latLng.lng();
-                        Restangular.all('events').one(AuthService.event).all('notification').post({
+                        Restangular.all('events').one(AuthService.event()).all('notification').post({
                             text: 'You have been summoned',
                             lat: lat,
                             long: long

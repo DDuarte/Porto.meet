@@ -351,17 +351,13 @@ module.exports = function (server, passport, db, jwt) {
 		var eventName = req.params.id;
 		var text = req.body.text;
 		var message = {"Text": text, "Position": {"Lat": req.body.lat, "Long": req.body.long}};
-		db.collections.user.find({CurrentEvent: eventName}, {active:false} , {multi: true} , function(err, user) {
+		db.collections.user.find({CurrentEvent: eventName} , function(err, user) {
 			if(!err) {
-				user.Notifications.push(message);
-				user.save(function(err) {
-					if(!err) {
-						return res.json(500, {"Error":"Bad query"});
-					}
-					else {
-						return res.json(200, {"Success":"True"});
-					}
-				});
+                for(var i =0 ; i < user.length;i++) {
+                   // console.log("User", user[i]);
+                    user[i].Notifications.push(message);
+                    user[i].save();
+                }
             }
         });
     });
