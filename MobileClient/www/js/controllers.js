@@ -273,7 +273,35 @@ angular.module('starter.controllers', [])
             };
             var map = new google.maps.Map(document.getElementById("map"),
                 mapOptions);
-
+            map.set('styles', [
+                {
+                    "stylers": [
+                        {
+                            "hue": "#007fff"
+                        },
+                        {
+                            "saturation": 89
+                        }
+                    ]
+                },
+                {
+                    "featureType": "water",
+                    "stylers": [
+                        {
+                            "color": "#ffffff"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "administrative.country",
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                }
+            ]);   
             var infowindow = new google.maps.InfoWindow();
 
             var marker, i;
