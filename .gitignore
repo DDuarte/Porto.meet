@@ -37,10 +37,5 @@ _ReSharper*/
 ant-build
 ant-gen
 
-# see https://intellij-support.jetbrains.com/entries/23393067
-.idea/gradle.xml
-.idea/dictionaries/*.xml
-.idea/watcherTasks.xml
-.idea/workspace.xml
-.idea/runConfigurations/*.xml
-.idea/misc.xml
+.idea
+*.iml
