@@ -122,7 +122,7 @@ angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', '
 
         RestangularProvider.setDefaultHttpFields({timeout: 10000}); // set timeout of 10 seconds
 
-        OAuth.initialize('Er6QTrouxLQowqHiw5SScL78y24');
+        OAuth.initialize('b-iBME2kgUSSguGOubYOIxe6pqQ');
 
         // configure states
         $stateProvider

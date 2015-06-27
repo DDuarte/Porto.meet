@@ -19,6 +19,10 @@
                         {
                             "xml": "<feature name=\"InAppBrowser\"><param name=\"android-package\" value=\"org.apache.cordova.inappbrowser.InAppBrowser\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<access origin=\"https://oauth.io\" />",
+                            "count": 1
                         }
                     ]
                 }
@@ -53,6 +57,9 @@
             "PACKAGE_NAME": "com.ionicframework.starter"
         },
         "org.apache.cordova.statusbar": {
+            "PACKAGE_NAME": "com.ionicframework.starter"
+        },
+        "com.oauthio.plugins.oauthio": {
             "PACKAGE_NAME": "com.ionicframework.starter"
         }
     },

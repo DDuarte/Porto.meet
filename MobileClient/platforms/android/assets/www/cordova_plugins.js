@@ -27,6 +27,13 @@ module.exports = [
         "clobbers": [
             "window.StatusBar"
         ]
+    },
+    {
+        "file": "plugins/com.oauthio.plugins.oauthio/www/dist/oauth.js",
+        "id": "com.oauthio.plugins.oauthio.OAuth",
+        "merges": [
+            "OAuth"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -36,7 +43,8 @@ module.exports.metadata =
     "org.apache.cordova.device": "0.2.9",
     "org.apache.cordova.geolocation": "0.3.7",
     "org.apache.cordova.inappbrowser": "0.4.0",
-    "org.apache.cordova.statusbar": "0.1.3"
+    "org.apache.cordova.statusbar": "0.1.3",
+    "com.oauthio.plugins.oauthio": "0.2.4"
 }
 // BOTTOM OF METADATA
 });

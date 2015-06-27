@@ -1,0 +1,11 @@
+{
+    "com.oauthio.plugins.oauthio": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/oauth-io/oauth-phonegap",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
+    }
+}
