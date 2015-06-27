@@ -348,11 +348,11 @@ module.exports = function (server, passport, db, jwt) {
     
 	// POST /api/event/{id}/notification
     server.post('/api/events/:id/notification', function (req, res, next) {
-		var name = req.params.id;
+		var eventName = req.params.id;
 		var text = req.body.message;
 		var location = JSON.parse(req.body.location);
 		var message = {"Text": text, "Position": location};
-		db.collections.user.find({CurrentEvent: id}, {active:false} , {multi: true} , function(err, user) {
+		db.collections.user.find({CurrentEvent: eventName}, {active:false} , {multi: true} , function(err, user) {
 			if(!err) {
 				user.Notifications.push(message);
 				user.save(function(err) {
@@ -367,19 +367,21 @@ module.exports = function (server, passport, db, jwt) {
         });
     });
      
-	// DELETE /api/user/{id}/notification
-	server.delete('/api/users/notification', function(req,res,next){
-		var email = req.user.email;
-		db.collections.user.findOne({Email: email}, function (err, user){
+	// GET /api/user/{id}/notification
+	server.get('/api/user/:id/notifications', function(req, res, next){
+		var email = req.params.id;
+		db.collections.user.findOne({Email: email}, function(err, user){
 			if(err){
-				return res.json(500, {"Error":"Bad query", "Reason": err});
+				console.log(err);
+				return res.json(500, {"Error", "Bad Query"});
 			}else{
-				user.Notifications.pull(0);
+				var notifications = user.Notifications;
+				user.Notifications=[];
 				user.save();
-				return res.json(200, {"Success":"True"});
+				return res.json(200, notifications);
 			}
 		});
-	});      
+	});    
 		
 	// GET /api/pois
     server.get('/api/pois/', function (req, res, next) {
