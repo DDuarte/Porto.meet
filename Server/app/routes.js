@@ -207,7 +207,7 @@ module.exports = function (server, passport, db, jwt) {
             if(err){
                return res.json(500, err);
             } else if(!e || e.length == 0){
-                var newEvent = new db.collections.event({Name: req.body.name,Pass: req.body.password, Admin: [req.user.id], Attendants: []});
+                var newEvent = new db.collections.event({Name: req.body.name,Pass: req.body.password, Admin: [req.user.Email], Attendants: []});
         
                 newEvent.save(function(err, newEvent){
                     if (err)
@@ -224,7 +224,7 @@ module.exports = function (server, passport, db, jwt) {
                     }
                     
                     u.CurrentEvent = req.body.name;
-                    u.save(function(err, res){
+                    u.save(function(err, u){
                         if (err) 
                             return res.json(500, err);
                     });

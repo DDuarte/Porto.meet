@@ -19,7 +19,7 @@ collections.user = mongoose.model('User', new mongoose.Schema({
 collections.event = mongoose.model('Event', new mongoose.Schema({
 	Name: String,
 	Pass: String,
-	Admin: [{ type : mongoose.Schema.ObjectId, ref: 'User'}],
+	Admin: [String],
 	Attendants: [String]
 }));
 
