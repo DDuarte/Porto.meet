@@ -239,7 +239,7 @@ angular.module('starter.controllers', [])
         };
     })
 
-    .controller('MapCtrl', function ($scope, $ionicLoading, AlertPopupService, $ionicSideMenuDelegate, AuthService, Restangular, $timeout) {
+    .controller('MapCtrl', function ($scope, $ionicLoading, $ionicPopup, AlertPopupService, $ionicSideMenuDelegate, AuthService, Restangular, $timeout) {
 
         $scope.map = {
             center: {
@@ -271,20 +271,7 @@ angular.module('starter.controllers', [])
                         markers = [];
 
                         for (i = 0; i < users.length; i++) {
-                            var marker = new google.maps.Marker({
-                                position: new google.maps.LatLng(users[i].Position.Lat, users[i].Position.Long),
-                                map: map,
-                                icon: "http://ruralshores.com/assets/marker-icon.png"
-                            });
-
-                            markers.push(marker);
-
-                            google.maps.event.addListener(marker, 'click', (function(marker, i) {
-                                return function() {
-                                    infowindow.setContent(users[i].Name);
-                                    infowindow.open(map, marker);
-                                }
-                            })(marker, i));
+                            addMarker(users[i].Position.Lat, users[i].Position.Long, map, "http://ruralshores.com/assets/marker-icon.png", users[i].Name);
                         }
                     }, function (err) {
                         console.log(err);
@@ -293,8 +280,31 @@ angular.module('starter.controllers', [])
                 $timeout(markersTick, 5000);
             })();
 
+            function addMarker(lat, long, map, icon, description, permanent) {
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(lat, long),
+                    map: map,
+                    icon: icon
+                });
+
+                if (!permanent)
+                    markers.push(marker);
+
+                google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                    return function() {
+                        infowindow.setContent(description);
+                        infowindow.open(map, marker);
+                    }
+                })(marker, i));
+            }
+
+            var myPosition = { Lat: 0, Long: 0 };
+
             (function updatePosTick() {
                 navigator.geolocation.getCurrentPosition(function (pos) {
+                    myPosition.Lat = pos.coords.latitude;
+                    myPosition.Long = pos.coords.longitude;
+
                     Restangular.all('users').one(AuthService.currentUser().Email).all('location').post({
                         lat: pos.coords.latitude,
                         long: pos.coords.longitude
@@ -310,6 +320,50 @@ angular.module('starter.controllers', [])
 
                 $timeout(updatePosTick, 5000);
             })();
+
+            (function getNotificationsTick() {
+                Restangular.all('user').one(AuthService.currentUser().Email).all('notifications').getList()
+                    .then(function(notifications) {
+                        console.log("Notifications request", notifications);
+                        if (notifications.length == 0) {
+                            return;
+                        }
+
+                        var notif = notifications[notifications.length - 1];
+                        var alertPopup = $ionicPopup.alert({
+                            title: 'Notification',
+                            template: notif.Text
+                        });
+
+                        alertPopup.then(function () {
+                            addMarker(notif.Position.Lat, notif.Position.Long, map, "http://portal.roadworks.org/img/portal/fr/marker_road_cone2.png", notif.Text, true);
+                            mapRoute(myPosition, notif.Position);
+                        });
+
+                    }, function (err) {
+                        console.log("Notifications request error", err);
+                    });
+
+                $timeout(getNotificationsTick, 5000);
+            })();
+
+            function mapRoute(ori, dest) {
+
+                var start = new google.maps.LatLng(ori.Lat, ori.Long);
+                var end = new google.maps.LatLng(dest.Lat, dest.Long);
+                var request = {
+                    origin: start,
+                    destination: end,
+                    travelMode: google.maps.TravelMode.WALKING
+                };
+                directionsService.route(request, function(result, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        directionsDisplay.setDirections(result);
+                    } else {
+                        console.log("couldn't get directions", status);
+                    }
+                });
+            }
 
             var mapOptions = {
                 center: new google.maps.LatLng(41.17,-8.614912),
@@ -348,6 +402,9 @@ angular.module('starter.controllers', [])
                 }
             ]);   
             var infowindow = new google.maps.InfoWindow();
+            var directionsService = new google.maps.DirectionsService();
+            var directionsDisplay = new google.maps.DirectionsRenderer();
+            directionsDisplay.setMap(map);
 
             var marker, i;
         

@@ -373,7 +373,7 @@ module.exports = function (server, passport, db, jwt) {
 		db.collections.user.findOne({Email: email}, function(err, user){
 			if(err){
 				console.log(err);
-				return res.json(500, {"Error", "Bad Query"});
+				return res.json(500, {"Error": "Bad Query"});
 			}else{
 				var notifications = user.Notifications;
 				user.Notifications=[];
