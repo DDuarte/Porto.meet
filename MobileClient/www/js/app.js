@@ -133,22 +133,18 @@ angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', '
                 controller: 'LoginCtrl'
             })
 
+            .state('welcome', {
+                url: '/welcome',
+                templateUrl: 'templates/welcome.html',
+                controller: 'WelcomeCtrl'
+            })
+
             .state('app', {
                 url: '/app',
                 abstract: true,
                 templateUrl: 'templates/menu.html',
                 controller: 'AppCtrl'
             })
-
-			.state('app.welcome', {
-				url: '/welcome',
-                views: {
-                    'app': {
-                        templateUrl: 'templates/welcome.html',
-                        controller: 'WelcomeCtrl'
-                    }
-                }
-			})
 
             .state('app.user', {
                 url: '/users/:userId',

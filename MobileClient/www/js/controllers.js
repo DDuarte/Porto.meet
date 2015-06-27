@@ -38,7 +38,7 @@ angular.module('starter.controllers', [])
             }).then(function (data) {
                 AuthService.login(data.user, data.access_token);
                 $ionicLoading.hide();
-                $state.go('app.welcome', { userId: data.user.id, initFilter: "" });
+                $state.go('app.welcome', { userId: data.user.id });
             }, function (response) {
                 $ionicLoading.hide();
                 AlertPopupService.createPopup("Error", response.data.error);
@@ -141,10 +141,23 @@ angular.module('starter.controllers', [])
     })
 
     .controller('WelcomeCtrl', function ($scope, $state, $stateParams, Restangular) {
+        $scope.data = {
+            groupName: '',
+            groupPass: ''
+        };
 
+        $scope.createGroup = function () {
+            console.log("Create", $scope.data.groupName, $scope.data.groupPass);
+            $state.go('app.map', { userId: 1 });
+        };
+
+        $scope.joinGroup = function () {
+            console.log("Join", $scope.data.groupName, $scope.data.groupPass);
+            $state.go('app.map', { userId: 1 });
+        };
     })
 
-    .controller('MapCtrl', function ($scope, $ionicLoading, AlertPopupService) {
+    .controller('MapCtrl', function ($scope, $ionicLoading, AlertPopupService, $ionicSideMenuDelegate) {
 
         $scope.map = {
             center: {
@@ -173,6 +186,8 @@ angular.module('starter.controllers', [])
             });
 
             $scope.map = map;
+
+            $ionicSideMenuDelegate.canDragContent(false);
         }
 
         $scope.centerOnMe = function () {
