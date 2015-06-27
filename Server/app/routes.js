@@ -9,6 +9,7 @@ var _ = require('lodash');
 var defaultAvatar = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y';
 var facebookEndpoint = "https://graph.facebook.com/me?access_token=";
 var googleEndpoint = "https://www.googleapis.com/oauth2/v2/userinfo?access_token=";
+var API_KEY = "hackacityporto2015_server";
 
 function public_user_info(user) {
     return {
@@ -848,4 +849,23 @@ module.exports = function (server, passport, jwt) {
 
         return token;
     }
+    
+    server.get('/api/pois/', function (req, res, next) {
+        var lat = req.query.lat;
+        var long = req.query.long;
+        var cat = req.query.cat;
+        var range = req.query.range;
+        console.log(lat);
+        if(lat && long && cat && range){
+         var query = "https://api.ost.pt/pois/?category="+cat+"&center="+lat+"%2C"+long+"&range="+range+"&key="+API_KEY;
+         console.log(query);
+         request(query, function(err, response, body) {
+             
+             res.json(JSON.parse(body).Objects);
+         });   
+        }
+        else{
+            return res.json(500, {"Error":"Bad query"});
+        }
+    });
 };
