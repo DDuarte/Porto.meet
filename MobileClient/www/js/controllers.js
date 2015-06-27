@@ -253,11 +253,16 @@ angular.module('starter.controllers', [])
         };
 
         function initialize() {
-            
-            var pois =  [
-              ['Book', -8.614912, 41.14679, 1],
-              ['UP', -8.6155879497528, 41.147076493095, 2],
-            ];
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                Restangular.one('pois').get({"lat":  pos.coords.longitude, "long": pos.coords.latitude, "cat": 111, "range": 4}).then(function (data) {
+                    console.log("pois request", data);
+                  for (var i = 0; i < data.length; i++) {
+                      addMarker(data[i].geom_feature.coordinates[1], data[i].geom_feature.coordinates[0], map, "http://www.ourtownstories.co.uk/images/pin-map.png", data[i].name, true);
+                  }
+                }, function (err) {
+                    console.log("pois request err", err);
+                });
+            });
 
             var markers = [];
 
@@ -290,12 +295,12 @@ angular.module('starter.controllers', [])
                 if (!permanent)
                     markers.push(marker);
 
-                google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                google.maps.event.addListener(marker, 'click', (function(marker) {
                     return function() {
                         infowindow.setContent(description);
                         infowindow.open(map, marker);
                     }
-                })(marker, i));
+                })(marker));
             }
 
             var myPosition = { Lat: 0, Long: 0 };
@@ -410,26 +415,32 @@ angular.module('starter.controllers', [])
               });
             directionsDisplay.setMap(map);
 
-            var marker, i;
-        
-            for (i = 0; i < pois.length; i++) {  
-              marker = new google.maps.Marker({
-                position: new google.maps.LatLng(pois[i][2], pois[i][1]),
-                map: map
-              });
-        
-              google.maps.event.addListener(marker, 'click', (function(marker, i) {
-                return function() {
-                  infowindow.setContent(pois[i][0]);
-                  infowindow.open(map, marker);
-                }
-              })(marker, i));
-            }
-
             // Stop the side bar from dragging when mousedown/tapdown on the map
             google.maps.event.addDomListener(document.getElementById('map'), 'mousedown', function (e) {
                 e.preventDefault();
                 return false;
+            });
+
+            google.maps.event.addListener(map, 'click', function(event) {
+                var confirmPopup = $ionicPopup.confirm({
+                    title: 'Meet Point'
+                });
+                confirmPopup.then(function (res) {
+                    if (res) {
+                        var lat = event.latLng.lat();
+                        var long = event.latLng.lng();
+                        Restangular.all('events').one(AuthService.event).all('notification').post({
+                            text: 'You have been summoned',
+                            lat: lat,
+                            long: long
+                        }).then(function (data) {
+                            console.log('Send Notification request', data);
+                        }, function (err) {
+                            console.log('Send Notification error', err);
+                        });
+                    } else {
+                    }
+                });
             });
 
             $scope.map = map;

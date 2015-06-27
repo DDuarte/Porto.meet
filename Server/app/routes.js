@@ -349,9 +349,8 @@ module.exports = function (server, passport, db, jwt) {
 	// POST /api/event/{id}/notification
     server.post('/api/events/:id/notification', function (req, res, next) {
 		var eventName = req.params.id;
-		var text = req.body.message;
-		var location = JSON.parse(req.body.location);
-		var message = {"Text": text, "Position": location};
+		var text = req.body.text;
+		var message = {"Text": text, "Position": {"Lat": req.body.lat, "Long": req.body.long}};
 		db.collections.user.find({CurrentEvent: eventName}, {active:false} , {multi: true} , function(err, user) {
 			if(!err) {
 				user.Notifications.push(message);

@@ -40,7 +40,7 @@ module.exports = function(server,db) {
 
     server.all("/api/users", jwtTokenAuthenticator);
     server.all("/api/users/*", jwtTokenAuthenticator);
-    server.all("/api/pois", jwtTokenAuthenticator);
+    //server.all("/api/pois", jwtTokenAuthenticator);
     server.all("/api/events", jwtTokenAuthenticator);
     server.all("/api/events/*", jwtTokenAuthenticator);
 };
