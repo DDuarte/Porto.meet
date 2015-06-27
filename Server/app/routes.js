@@ -645,10 +645,11 @@ module.exports = function (server, passport, db, jwt) {
                 user.Position = {Lat: lat , Long: long};
                 user.save(function(err) {
                     if(!err) {
-                        return res.json(500, {"Error":"Bad query"});
+                        return res.json(200, {"Success":"True"});
                     }
                     else {
-                         return res.json(200, {"Success":"True"});
+                         return res.json(500, {"Error":"Bad query"});
+                        
                     }
                 });
             }
@@ -665,10 +666,11 @@ module.exports = function (server, passport, db, jwt) {
                 user.Notifications.push(text);
                 user.save(function(err) {
                     if(!err) {
-                        return res.json(500, {"Error":"Bad query"});
+                        return res.json(200, {"Success":"True"}); 
                     }
                     else {
-                         return res.json(200, {"Success":"True"});
+                        return res.json(500, {"Error":"Bad query"});
+                       
                     }
                 });
             }
