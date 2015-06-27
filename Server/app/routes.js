@@ -477,6 +477,57 @@ module.exports = function (server, passport, db, jwt) {
             }
         });
     });
+    
+    server.post('/api/leaveEvent', function(req, res){
+        if (req.body === undefined) {
+            return res.json(409, {error: "No body defined"});
+        }
+
+        if (req.body.name === undefined) {
+            return res.json(409, {error: "Attribute 'name' is missing."});
+        }
+        
+        db.collections.event.find({Name: req.body.name}, function(err, e){
+            if(err){
+               return res.json(500, err);
+            } else if(!e){
+               return res.json(409, {error: "Event not found."});
+            }
+            
+            var i = e.Attendants.indexOf(req.user.id);
+            if (i > -1) {
+                e.Attendants.splice(i, 1);
+                e.save(function(err, res){
+                    if (err) 
+                        return res.json(500, err);
+                    else
+                        return res.json(200, e);
+                });
+            } else {
+                return res.json(200, e);
+            }
+        });
+    });
+    
+    server.post('/api/event/:id/notification', function (req, res, next) {
+       var name = req.params.id;
+       var text = req.body.message;
+       var long = req.body.long;
+       
+         db.collections.user.find({CurrentEvent: id}, {active:false} , {multi: true} , function(err, user) {
+            if(!err) {
+                user.Notifications.push(text);
+                user.save(function(err) {
+                    if(!err) {
+                        return res.json(500, {"Error":"Bad query"});
+                    }
+                    else {
+                         return res.json(200, {"Success":"True"});
+                    }
+                });
+            }
+        });
+    });
         
     // asynchronous version of the fuzzy evaluation function defined above
     function asyncFuzzyTest(searchTerm, user, callback) {
