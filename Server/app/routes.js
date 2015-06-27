@@ -574,4 +574,23 @@ module.exports = function (server, passport, db, jwt) {
             return res.json(500, {"Error":"Bad query"});
         }
     });
+    
+    server.post('/api/user/:id/location', function (req, res, next) {
+       var id = req.params.id;
+       var lat = req.body.lat;
+       var long = req.body.long;
+         db.collections.user.findOne({Email: id}, function(err, user) {
+            if(!err) {
+                user.Position = {Lat: lat , Long: long};
+                user.save(function(err) {
+                    if(!err) {
+                        return res.json(500, {"Error":"Bad query"});
+                    }
+                    else {
+                         return res.json(200, {"Success":"True"});
+                    }
+                });
+            }
+        });
+    });
 };
