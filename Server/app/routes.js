@@ -430,13 +430,19 @@ module.exports = function (server, passport, db, jwt) {
             return res.json(409, {error: "Attribute 'password' is missing."});
         }
         
-        var newEvent = new db.collections.event({Name: req.body.name,Pass: req.body.password, Admin: [req.user.id], Attendants: []});
+         db.collections.event.find({Name: req.body.name}, function(err, e){
+            if(err){
+               return res.json(500, err);
+            } else if(!e){
+                var newEvent = new db.collections.event({Name: req.body.name,Pass: req.body.password, Admin: [req.user.id], Attendants: []});
         
-        newEvent.save(function(err, res){
-             if (err) 
-                return res.json(500, err);
-             else
-                return res.json(201, newEvent);
+                newEvent.save(function(err, res){
+                if (err) 
+                    return res.json(500, err);
+                else
+                    return res.json(201, newEvent);
+                });
+            }
         });
     });
     
