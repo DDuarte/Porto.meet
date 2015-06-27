@@ -9,21 +9,22 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
   var collection = db.collection('pointsofinterest');
   insertDocuments(function(resp) {
-	  console.log(resp);
-	   for (var index = 0; index < resp.contextResponses.length; index++) {
-		  var element = resp.contextResponses[index].contextElement.attributes;
-		  console.log(element);
+	   for (var index = 0; index < resp.length; index++) {
+		  var element = resp[index];
 		  collection.insert(element);
 		  console.log("Inserted");
   	}
-    db.close();
   });
 });
 
 var insertDocuments = function(callback) {
-  requestify.get('https://api.ost.pt/ngsi10/contextEntityTypes/pois/?key=hackacityporto2015_server&municipality=806')
-  .then(function(response) {
-	  console.log("resp");
-	  callback(response.getBody());
-  });
+  var data = new Array();
+  for (var index = 0; index < 7080; index+=25) {
+    requestify.get('https://api.ost.pt/ngsi10/contextEntityTypes/pois/?key=hackacityporto2015_server&municipality=806&offset='+index)
+    .then(function(response) {
+  	  console.log("Inserted");
+  	  data.push(response.getBody().contextResponses)
+    });
+  }
+   callback(data);
 }
