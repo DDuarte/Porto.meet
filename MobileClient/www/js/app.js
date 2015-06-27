@@ -4,7 +4,7 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', 'ngCookies', 'dx'])
+angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', 'ngCookies'])
 
     .run(function ($ionicPlatform, $cookieStore, AuthService) {
         $ionicPlatform.ready(function () {
