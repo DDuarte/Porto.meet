@@ -28,4 +28,5 @@
         <param name="onload" value="true" />
         <param name="android-package" value="com.ionic.keyboard.IonicKeyboard" />
     </feature>
+    <access origin="https://oauth.io" />
 </widget>
