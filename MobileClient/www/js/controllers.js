@@ -82,9 +82,7 @@ angular.module('starter.controllers', [])
             OAuth.popup("facebook", {authorize:{scope:"public_profile user_friends email"}}, function (err, res) {
                 if (err) {
                     AlertPopupService.createPopup("Error", err);
-                }
-                else {
-
+                } else {
                     $ionicLoading.show({
                         template: 'Logging in...'
                     });
@@ -241,7 +239,7 @@ angular.module('starter.controllers', [])
         };
     })
 
-    .controller('MapCtrl', function ($scope, $ionicLoading, AlertPopupService, $ionicSideMenuDelegate) {
+    .controller('MapCtrl', function ($scope, $ionicLoading, AlertPopupService, $ionicSideMenuDelegate, AuthService, Restangular, $timeout) {
 
         $scope.map = {
             center: {
@@ -260,12 +258,59 @@ angular.module('starter.controllers', [])
               ['Book', -8.614912, 41.14679, 1],
               ['UP', -8.6155879497528, 41.147076493095, 2],
             ];
-            
-            var users = [
-              ['A', -8.614, 41.14679, 1],
-              ['B', -8.616, 41.147076493095, 2],
-            ];
-            
+
+            var markers = [];
+
+            (function markersTick() {
+                Restangular.all('events').one(AuthService.event()).all('users').getList().
+                    then(function (users) {
+                        for (var i = 0; i < markers.length; i++) {
+                            markers[i].setMap(null);
+                        }
+
+                        markers = [];
+
+                        for (i = 0; i < users.length; i++) {
+                            var marker = new google.maps.Marker({
+                                position: new google.maps.LatLng(users[i].Position.Lat, users[i].Position.Long),
+                                map: map,
+                                icon: "http://ruralshores.com/assets/marker-icon.png"
+                            });
+
+                            markers.push(marker);
+
+                            google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                                return function() {
+                                    infowindow.setContent(users[i].Name);
+                                    infowindow.open(map, marker);
+                                }
+                            })(marker, i));
+                        }
+                    }, function (err) {
+                        console.log(err);
+                    });
+
+                $timeout(markersTick, 5000);
+            })();
+
+            (function updatePosTick() {
+                navigator.geolocation.getCurrentPosition(function (pos) {
+                    Restangular.all('users').one(AuthService.currentUser().Email).all('location').post({
+                        lat: pos.coords.latitude,
+                        long: pos.coords.longitude
+                    }).then(function (response) {
+                        console.log("updatePosTick request", response);
+                    }, function (err) {
+                        console.log("updatePosTick request error", err);
+                    });
+
+                }, function (error) {
+                    console.log("updatePosTick error", error);
+                });
+
+                $timeout(updatePosTick, 5000);
+            })();
+
             var mapOptions = {
                 center: new google.maps.LatLng(41.17,-8.614912),
                 zoom: 16,
@@ -319,21 +364,7 @@ angular.module('starter.controllers', [])
                 }
               })(marker, i));
             }
-            
-            for (i = 0; i < users.length; i++) {  
-              marker = new google.maps.Marker({
-                position: new google.maps.LatLng(users[i][2], users[i][1]),
-                map: map,
-                icon: "http://ruralshores.com/assets/marker-icon.png"
-              });
-        
-              google.maps.event.addListener(marker, 'click', (function(marker, i) {
-                return function() {
-                  infowindow.setContent(users[i][0]);
-                  infowindow.open(map, marker);
-                }
-              })(marker, i));
-            }
+
             // Stop the side bar from dragging when mousedown/tapdown on the map
             google.maps.event.addDomListener(document.getElementById('map'), 'mousedown', function (e) {
                 e.preventDefault();
@@ -362,7 +393,6 @@ angular.module('starter.controllers', [])
                 });
 
                 $scope.map.setCenter(new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
-                //$scope.loading.hide();
                 $ionicLoading.hide();
             }, function (error) {
                 $ionicLoading.hide();
@@ -371,4 +401,4 @@ angular.module('starter.controllers', [])
         };
 
         initialize();
-    })
+    });

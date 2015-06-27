@@ -428,7 +428,8 @@ module.exports = function (server, passport, db, jwt) {
 		db.collections.event.findOne({Name: eventName}, function(err, event){
 			if(err){
 				return res.json(500, {"Error": "Event not found"});
-			} else{
+			} else {
+                console.log("Event", event);
 				db.collections.user.find({ Email : { $in : event.Attendants}}, function(err, users){
 					if(err){
 						return res.json(500, {"Error":"Query error"});
