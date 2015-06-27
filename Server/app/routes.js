@@ -223,7 +223,7 @@ module.exports = function (server, passport, db, jwt) {
                         return res.json(409, {error: "User not found."});
                     }
                     
-                    u.CurrentEvent = req.user.name;
+                    u.CurrentEvent = req.body.name;
                     u.save(function(err, res){
                         if (err) 
                             return res.json(500, err);
