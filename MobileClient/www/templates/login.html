@@ -1,24 +1,17 @@
-<ion-nav-bar class="bar-positive nav-title-slide-ios7"
-             back-button-type="button-icon"
-             back-button-icon="ion-ios7-arrow-back">
-</ion-nav-bar>
-
-<ion-view title="Porto.meet">
+<ion-view title="Porto.meet" id="welcome-view" hide-nav-bar="true">
     <ion-content>
-        <div class="card">
-            <div class="item item-text-wrap">
-                <button class="button button-block button-positive" ng-class="{ disabled: logging_in }"
-                        ng-click="facebookLogin()">
-                    <i class="icon ion-social-facebook">
-                    </i>
-                    &nbsp Login with Facebook
-                </button>
-                <button class="button button-block button-assertive" ng-click="googleLogin()">
-                    <i class="icon ion-social-googleplus">
-                    </i>
-                    &nbsp Login with Google+
-                </button>
+        <div class="logo-welcome"></div>
+        <div class="login-btns">
+            <div id="social-links">
+                <ul>
+                    <li ng-click="facebookLogin()"><span class="ifacebook"><img src="img/social-icons/facebook.png"></span><a href="#" class="afacebook">sign in with facebook</a></li>
+                    <li ng-click="googleLogin()"><span class="igoogleplus"><img src="img/social-icons/googleplus.png"></span><a href="#" class="agoogleplus">sign in with google+</a></li>
+                    <li ng-click="twitterLogin()"><span class="itwitter"><img src="img/social-icons/twitter.png"></span><a href="#" class="atwitter">sign in with twitter</a></li>
+                </ul>
             </div>
         </div>
     </ion-content>
+    <div id="footer" class="bar bar-footer">
+        <div class="title em-footer-title">© Code Walkers</div>
+    </div>
 </ion-view>
