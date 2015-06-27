@@ -403,7 +403,11 @@ angular.module('starter.controllers', [])
             ]);   
             var infowindow = new google.maps.InfoWindow();
             var directionsService = new google.maps.DirectionsService();
-            var directionsDisplay = new google.maps.DirectionsRenderer();
+            var directionsDisplay = new google.maps.DirectionsRenderer({
+                polylineOptions: {
+                  strokeColor: "red"
+                }
+              });
             directionsDisplay.setMap(map);
 
             var marker, i;
