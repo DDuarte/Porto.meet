@@ -78,10 +78,10 @@ server.use(passport.session());
 
 // routes ==========================================
 
-require('./config/jwtAuth.js')(server);
+require('./config/jwtAuth.js')(server, database);
 
 // load our routes and pass in our server and fully configured passport
-require('./app/routes.js')(server, passport, jwt);
+require('./app/routes.js')(server, passport, database, jwt);
 
 // launch ==========================================
 var port = process.env.PORT || 1337;

@@ -1,33 +1,23 @@
 var mongoose = require('mongoose');
 
-module.exports = function (collections) {
-	//Connect to server
-	mongoose.connect('mongodb://porto:meet@ds063779.mongolab.com:63779/portomeet');
-	
-	var db = mongoose.connection;
-	
-	//Error Handler
-	db.on('error', console.error.bind(console, 'connection error:'));
+//Connect to server
+mongoose.connect('mongodb://porto:meet@ds063779.mongolab.com:63779/portomeet');
 
-	db.once('open', function (callback) {
-		// yay!
+var collections = {};
 
-		var user = mongoose.model('User', new mongoose.Schema({
-			Id: mongoose.Types.ObjectId,
-			FaceID: String,
-			GoogleID: String,
-			Email: String
-		}));
-				
-		var event = mongoose.model('Event', new mongoose.Schema({
-			Name: String,
-			Pass: String,
-			Admin: [{ type : mongoose.Types.ObjectId, ref: 'User'}],
-			Attendants: [{ type : mongoose.Types.ObjectId, ref: 'User'}]
-		}));
+collections.user = mongoose.model('User', new mongoose.Schema({
+	FaceID: String,
+	GoogleID: String,
+	Email: String,
+	Avatar: String,
+	Position: {Lat: Number , Long: Number}
+}));
 		
-		collections.user = user;
-		collections.event = event;	
+collections.event = mongoose.model('Event', new mongoose.Schema({
+	Name: String,
+	Pass: String,
+	Admin: [{ type : mongoose.Schema.ObjectId, ref: 'User'}],
+	Attendants: [{ type : mongoose.Schema.ObjectId, ref: 'User'}]
+}));
 
-	});
-}
+exports.collections = collections;

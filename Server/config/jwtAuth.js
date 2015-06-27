@@ -1,6 +1,6 @@
 var jwt = require('jwt-simple');
 
-module.exports = function(server) {
+module.exports = function(server,db) {
 
     server.set("jwtTokenSecret", "jwtIsAwesomeIndeedNoQuestionAboutIt");
 
@@ -17,9 +17,9 @@ module.exports = function(server) {
                 if (decoded.exp <= Date.now()) {
                     return res.json(400, { error: "Access token has expired" });
                 } else {
-                    req.models.user.get(decoded.iss, function(err, user) {
-
-                        if (err)
+					console.log(decoded);
+					db.collections.user.findOne({Email: decoded.iss}, function (err, user){
+						if (err)
                             return res.json(400, {error: "Invalid user id"});
 
                         if (!user)
@@ -27,7 +27,7 @@ module.exports = function(server) {
 
                         req.user = user;
                         return next();
-                    });
+					});
                 }
 
             } catch (err) {

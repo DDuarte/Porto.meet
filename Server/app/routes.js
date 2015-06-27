@@ -5,6 +5,7 @@ var moment = require('moment');
 var request = require('request');
 var shortId = require('shortid');
 var _ = require('lodash');
+var mongoose = require('mongoose');
 
 var defaultAvatar = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm&f=y';
 var facebookEndpoint = "https://graph.facebook.com/me?access_token=";
@@ -34,7 +35,7 @@ function protected_user_info(user, facebookAccount, googleAccount) {
     return ret;
 }
 
-module.exports = function (server, passport, jwt) {
+module.exports = function (server, passport, db, jwt) {
     //server.all("/api/", validChecksum);
     //server.all("/api/*", validChecksum);
 
@@ -147,7 +148,6 @@ module.exports = function (server, passport, jwt) {
     // POST /api/login/facebook
     server.post('/api/login/facebook', function (req, res, next) {
 
-
         if (!req.body.token) {
             return res.json(400, {error: 'Missing facebook token'});
         }
@@ -176,44 +176,46 @@ module.exports = function (server, passport, jwt) {
 
                     if (profile.verified === false)
                         return callback({ error: "Facebook account not verified" });
-
-                    req.models.facebook.get(profile.id, function (err, facebookUser) { // login attempt
-
-                        if (err || !facebookUser) {
-                            return callback({ error: "User not found" });
-                        }
-
-                        facebookUser.getLocalAccount(function (err, localUser) {
-
-                            if (err)
-                                return callback({ error: "Local user not found" });
-
-                            var expires = moment().add('days', 7).valueOf();
-                            var token = generateToken(localUser.id, expires);
-                            var ret = {
-                                access_token: token,
-                                user: {
-                                    id: localUser.id,
-                                    email: localUser.email,
-                                    avatar: localUser.avatar,
-                                    currency: localUser.currency,
-                                    facebookAccount: {
-                                        email: profile.email,
-                                        access_token: req.body.token
-                                    }
-                                }};
-
-                            facebookUser.save({token: req.body.token}, function(err) {
-                                return callback(null, ret);
-                            });
-                        });
-                    });
+					
+					db.collections.user.findOne({Email: profile.email}, function (err, user){
+						if(err){
+							console.log(err);
+							return callback(err);
+						}
+						else if(!user){
+							user = new db.collections.user({
+								FaceID: profile.id, 
+								GoogleID: "",
+								Email: profile.email, 
+								Avatar: profilePicture.data.url,
+								Position: {Lat: 0, Long: 0}
+							});
+							user.save(function (err, result){
+								if(err)
+									console.log(err);
+							});
+						}else{
+							user.FaceID = profile.id;
+							user.save(function (err, result){
+								if(err)
+									console.log(err);
+							});
+						}
+						
+						var expires = moment().add('days', 7).valueOf();
+                        var token = generateToken(user.email, expires);
+						var ret = {
+                            access_token: token,
+							user: user
+                        };
+						callback(null,ret);
+					});
                 });
             }
         ], function (err, result) {
             if (err)
                 return res.json(400, err);
-
+			
             res.json(200, result);
         });
     });
