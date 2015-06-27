@@ -262,7 +262,7 @@ angular.module('starter.controllers', [])
             ];
             
             var mapOptions = {
-                center: new google.maps.LatLng(-8.614912,41.14679),
+                center: new google.maps.LatLng(41.17,-8.614912),
                 zoom: 16,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
