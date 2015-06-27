@@ -64,6 +64,7 @@ angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', '
 
         var currentUser;
         var isAdmin;
+        var event;
 
         function token() {
             if (currentUser && currentUser.access_token)
@@ -99,6 +100,14 @@ angular.module('PortoMeetApp', ['ionic', 'starter.controllers', 'restangular', '
 
             this.currentUser = function () {
                 return currentUser;
+            };
+
+            this.event = function () {
+                return event;
+            };
+
+            this.setEvent = function (ev) {
+                event = ev;
             };
 
             this.token = token;

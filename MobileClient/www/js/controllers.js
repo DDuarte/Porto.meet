@@ -26,7 +26,7 @@ angular.module('starter.controllers', [])
         };
 
         $scope.abandon = function () {
-            Restangular.all('events').one(AuthService.currentUser.event).all('leave').post({
+            Restangular.all('events').one(AuthService.event()).all('leave').post({
             }).then(function (data) {
                 AuthService.setAdmin(false);
                 $state.go('welcome');
@@ -96,10 +96,10 @@ angular.module('starter.controllers', [])
                         console.log(data.user);
 
                         if (data.user && data.user.CurrentEvent) {
-                            AuthService.currentUser.event = data.user.CurrentEvent;
+                            AuthService.setEvent(data.user.CurrentEvent);
                             $state.go('app.map', {userId: data.user.id});
                         } else {
-                            AuthService.currentUser.event = '';
+                            AuthService.setEvent('');
                             $state.go('welcome', {userId: data.user.id});
                         }
                     },
@@ -174,7 +174,7 @@ angular.module('starter.controllers', [])
                 $ionicLoading.hide();
                 console.log(data);
                 AuthService.setAdmin(true);
-                AuthService.currentUser.event = data.Name;
+                AuthService.setEvent(data.Name);
                 $state.go('app.map', { userId: 1 });
             }, function (err) {
                 $ionicLoading.hide();
@@ -199,6 +199,7 @@ angular.module('starter.controllers', [])
                 $ionicLoading.hide();
                 console.log(data);
                 AuthService.setAdmin(true);
+                AuthService.setEvent($scope.data.groupName);
                 $state.go('app.map', { userId: 1 });
             }, function (err) {
                 $ionicLoading.hide();
