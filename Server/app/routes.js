@@ -312,16 +312,8 @@ module.exports = function (server, passport, db, jwt) {
     });
     
 	// POST /api/event/leave
-    server.post('/api/events/leave', function(req, res){
-        if (req.body === undefined) {
-            return res.json(409, {error: "No body defined"});
-        }
-
-        if (req.body.name === undefined) {
-            return res.json(409, {error: "Attribute 'name' is missing."});
-        }
-        
-        db.collections.event.find({Name: req.body.name}, function(err, e){
+    server.post('/api/events/:name/leave', function(req, res){        
+        db.collections.event.find({Name: req.params.name}, function(err, e){
             if(err){
                return res.json(500, err);
             } else if(!e || e.length == 0){
