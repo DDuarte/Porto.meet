@@ -259,23 +259,19 @@ module.exports = function (server, passport, db, jwt) {
 	});
 	
 	// POST /api/event/join
-    server.post('/api/events/join', function(req, res){
+    server.post('/api/events/:name/join', function(req, res){
         if (req.body === undefined) {
             return res.json(409, {error: "No body defined"});
-        }
-
-        if (req.body.name === undefined) {
-            return res.json(409, {error: "Attribute 'name' is missing."});
         }
 
         if (req.body.password === undefined) {
             return res.json(409, {error: "Attribute 'password' is missing."});
         }
         
-        db.collections.event.find({Name: req.body.name}, function(err, e){
+        db.collections.event.findOne({Name: req.params.name}, function(err, e){
             if(err){
                return res.json(500, err);
-            } else if(!e || e.length == 0){
+            } else if(!e){
                return res.json(409, {error: "Event not found."});
             }
             
@@ -285,7 +281,7 @@ module.exports = function (server, passport, db, jwt) {
             
             if (!(e.Attendants.indexOf(req.user.Email) > -1)) {
                 e.Attendants.push(req.user.Email);
-                e.save(function(err, res){
+                e.save(function(err, e){
                     if (err) 
                         return res.json(500, err);
                 });
@@ -300,8 +296,8 @@ module.exports = function (server, passport, db, jwt) {
                     return res.json(409, {error: "User not found."});
                 }
                 
-                u.CurrentEvent = req.body.name;
-                u.save(function(err, res){
+                u.CurrentEvent = req.params.name;
+                u.save(function(err, u){
                     if (err) 
                         return res.json(500, err);
                     else

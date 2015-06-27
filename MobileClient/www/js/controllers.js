@@ -193,8 +193,7 @@ angular.module('starter.controllers', [])
             $ionicLoading.show({
                 template: 'Joining event...'
             });
-            Restangular.all('events').post({
-                name: $scope.data.groupName,
+            Restangular.all('events').one($scope.data.groupName).all('join').post({
                 password: $scope.data.groupPass
             }).then(function (data) {
                 $ionicLoading.hide();
@@ -215,7 +214,7 @@ angular.module('starter.controllers', [])
                 email: 'joaquina@example.com',
                 avatar: 'img/ionic.png'
             }, {
-                name: 'João',
+                name: 'Joï¿½o',
                 email: 'joao@example.com',
                 avatar: 'img/ionic.png'
             }, {
