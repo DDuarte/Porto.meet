@@ -407,7 +407,7 @@ module.exports = function (server, passport, db, jwt) {
                     if (err) 
                         return res.json(500, err);
                     else
-                        return res.json(200, e);
+                        return res.json(200, u);
                 });
             });
         });
@@ -436,14 +436,26 @@ module.exports = function (server, passport, db, jwt) {
                 e.save(function(err, res){
                     if (err) 
                         return res.json(500, err);
-                    else
-                        return res.json(200, e);
                 });
-            } else {
-                return res.json(200, e);
             }
             
-            //Missing update on user's currentEvent to ""
+            db.collections.user.find({Name: req.user.name},function(err, u){
+                if(err){
+                    return res.json(500, err); 
+                }
+                
+                if(!u){
+                    return res.json(409, {error: "User not found."});
+                }
+                
+                u.CurrentEvent = "";
+                u.save(function(err, res){
+                    if (err) 
+                        return res.json(500, err);
+                    else
+                        return res.json(200, u);
+                });
+            });
         });
     });
     
