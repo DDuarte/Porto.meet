@@ -42,39 +42,6 @@ angular.module('starter.controllers', [])
             $scope.isAdmin = isAdmin;
         });
     })
-    .controller("NotifyCtrl", function($scope, $cordovaLocalNotification, $timeout) {
- 
-        $scope.add = function() {
-            var alarmTime = new Date();
-            alarmTime.setMinutes(alarmTime.getMinutes() + 1);
-            $cordovaLocalNotification.add({
-                id: "1234",
-                date: alarmTime,
-                message: "This is a message",
-                title: "This is a title",
-                autoCancel: true,
-                sound: null
-            }).then(function () {
-                console.log("The notification has been set");
-            });
-        };
-     
-        $scope.isScheduled = function() {
-            $cordovaLocalNotification.isScheduled("1234").then(function(isScheduled) {
-                alert("Notification 1234 Scheduled: " + isScheduled);
-            });
-        };
-        
-        var poll = function() {
-             $timeout(function() {
-                 //update your chart
-                 $scope.param1 = $scope.param2;
-                 $scope.param2++ ;
-                 poll();
-             }, 100*$scope.pollingperiod);
-         };     
-         poll();
-    })
 
     .controller('LoginCtrl', function ($scope, $state, $ionicLoading, Restangular, AuthService, AlertPopupService) {
 
@@ -209,16 +176,20 @@ angular.module('starter.controllers', [])
     .controller('ConfigCtrl', function ($scope, $state, $stateParams, Restangular) {
         $scope.users = [
             {
-                name: 'Joaquina',
-                email: 'joaquina@example.com',
+                name: 'Duarte',
+                email: 'duarte@example.com',
                 avatar: 'img/ionic.png'
             }, {
-                name: 'Jo�o',
-                email: 'joao@example.com',
+                name: 'JPDias',
+                email: 'pinto@example.com',
                 avatar: 'img/ionic.png'
             }, {
-                name: 'Joana',
-                email: 'joana@example.com',
+                name: 'Pinto',
+                email: 'jpdias@example.com',
+                avatar: 'img/ionic.png'
+            }, {
+                name: 'Pedro',
+                email: 'pedro@example.com',
                 avatar: 'img/ionic.png'
             }
         ];

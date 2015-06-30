@@ -360,6 +360,8 @@ module.exports = function (server, passport, db, jwt) {
                 }
             }
         });
+
+        return res.sendStatus(200);
     });
      
 	// GET /api/user/{id}/notification
